@@ -5,7 +5,7 @@
     "Connectivity" : {
         "ClientName": "Pi1",
         "MqttIp": "localhost",
-        "MqttPort": "1883"
+        "MqttPort": 1883
     },
     "Rooms": [
         {
