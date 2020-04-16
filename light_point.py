@@ -23,7 +23,6 @@ class LightPoint(Point):
     def disable(self):
         self.led.off()
 
-
     def toggle(self):
         if self.led.is_lit:
             self.disable()

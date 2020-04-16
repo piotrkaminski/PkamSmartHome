@@ -1,9 +1,11 @@
 {
-    "Conf": {
-        "Name": "Pi1",
-        "Debug": true,
-        "MQTT-IP": "192.168.1.190",
-        "MQTT-Port": "1883"
+    "General": {
+        "Name": "Pi1"
+    },
+    "Connectivity" : {
+        "ClientName": "Pi1",
+        "MqttIp": "localhost",
+        "MqttPort": "1883"
     },
     "Rooms": [
         {
