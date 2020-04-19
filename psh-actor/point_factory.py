@@ -14,7 +14,7 @@ class PointFactory:
     def createPoint(self, type, room_name, configuration):
         point_type = configuration.get(CONFIG_POINT_TYPE)
         if point_type == CONFIG_POINT_TYPE_LIGHT:
-            return LightPoint(name=room_name + NAME_SEPARATOR + configuration.get(CONFIG_POINT_NAME),
+            return LightPoint(id=NAME_SEPARATOR + room_name + NAME_SEPARATOR + configuration.get(CONFIG_POINT_NAME),
                 controlPin=configuration.get(CONFIG_POINT_CONTROLPIN),
                 buttonPin=configuration.get(CONFIG_POINT_BUTTONPIN))
         else:

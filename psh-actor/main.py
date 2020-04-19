@@ -1,21 +1,20 @@
 from configuration import ConfigurationService
-from main_service import MainService
+from rooms_service import RoomsService
 from hub_communication_service import HubCommunicationService
+from signal import pause
 
 class Main:
 
     def __init__(self):
-        self.configService = ConfigurationService()
-        self.communicationService = HubCommunicationService()
-        self.mainService = MainService()
+        self.config_service = ConfigurationService()
+        self.communication_service = HubCommunicationService()
+        self.rooms_service = RoomsService()
 
     def main(self):
-        configuration = self.configService.read_configuration()
-        self.communicationService.initialize(configuration.get(CONFIG_CONNECTIVITY))
-        self.mainService.initialize(configuration)
-        
-        self.mainService.execute()
-        self.mainService.destroy()
+        configuration = self.config_service.read_configuration()
+        self.rooms_service.initialize(configuration)
+        self.communication_service.initialize(configuration, self.rooms_service)
+        pause()
 
 main = Main()
 main.main()

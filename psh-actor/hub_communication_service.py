@@ -1,7 +1,10 @@
+from constants import CONFIG_CONNECTIVITY
 from constants import CONFIG_CONNECTIVITY_CLIENTNAME
 from constants import CONFIG_CONNECTIVITY_MQTTIP
 from constants import CONFIG_CONNECTIVITY_MQTTPORT
 from constants import NAME_SEPARATOR
+from constants import TOPIC_IN
+from constants import TOPIC_OUT
 from paho.mqtt.client import Client
 from signal import pause
 
@@ -11,12 +14,15 @@ class HubCommunicationService:
     def __init__(self):
         self.client = None
         self.client_name = None
+        self.rooms_service = None
 
-    def initialize(self, configuration):
-        self.client_name = configuration.get(CONFIG_CONNECTIVITY_CLIENTNAME)
+    def initialize(self, configuration, rooms_service):
+        self.rooms_service = rooms_service
+        comm_config = configuration.get(CONFIG_CONNECTIVITY)
+        self.client_name = comm_config.get(CONFIG_CONNECTIVITY_CLIENTNAME)
         self.client = Client(self.client_name)
-        host = configuration.get(CONFIG_CONNECTIVITY_MQTTIP)
-        port = configuration.get(CONFIG_CONNECTIVITY_MQTTPORT)
+        host = comm_config.get(CONFIG_CONNECTIVITY_MQTTIP)
+        port = comm_config.get(CONFIG_CONNECTIVITY_MQTTPORT)
         self.client.enable_logger()
         self.client.on_message = self.on_message
         self.client.on_connect = self.on_connect
@@ -29,7 +35,14 @@ class HubCommunicationService:
         
     def create_topic_name(self):
         # topic format /Actor/In/#
-        return "{sep}{name}{sep}In{sep}#".format(sep=NAME_SEPARATOR, name=self.client_name)
+        return "{sep}{name}{sep}{tin}{sep}#".format(sep=NAME_SEPARATOR, tin = TOPIC_IN, name=self.client_name)
+
+    def get_point_id(self, channel):
+        topic_indicator = NAME_SEPARATOR + TOPIC_IN + NAME_SEPARATOR
+        idx = channel.find(topic_indicator)
+        if idx < 0:
+            return None
+        return channel[idx+len(topic_indicator)-1:len(channel)]
 
     def on_message(self, client, userdata, message):
         topic = message.topic
@@ -38,9 +51,8 @@ class HubCommunicationService:
         self.process_message(channel=topic, message=payload)
 
     def on_connect(self, client, userdata, flags, rc):
-        print("Connection returned result: " + str(rc))
-        topic = "/Pi1/In/#"
-        #topic = self.create_topic_name()
+        print("Connected to mqtt service on {0}:{1} ".format(client._host, client._port))
+        topic = self.create_topic_name()
         print("Subscribing to topic {}".format(topic))
         self.client.subscribe(topic)
 
@@ -48,14 +60,8 @@ class HubCommunicationService:
         self.client.publish(topic=channel, payload=message)
 
     def process_message(self, channel, message):
-        print("Msg prc: {0} msg: {1}".format(channel, message))
-
-
-
-main = HubCommunicationService()
-main.initialize({
-        "ClientName": "Pi1",
-        "MqttIp": "localhost",
-        "MqttPort": 1883
-    })
-pause()
+        point_id = self.get_point_id(channel)
+        if point_id is None:
+            print("Point_id not determined for channel {0} and message {1}, skipped"
+                .format(channel, message))
+        self.rooms_service.updateStatus(point_id, message)
