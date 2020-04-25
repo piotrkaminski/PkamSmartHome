@@ -9,12 +9,12 @@
     },
     "Rooms": [
         {
-            "Name": "LivingRoom",
+            "Name": "Office",
             "Points": [
                 {
-                    "Name": "Ceiling1",
+                    "Name": "Ceiling",
                     "Type": "Light",
-                    "GpioControlPin": 22,
+                    "GpioControlPin": 17,
                     "GpioButtonPin": 2
                 }
             ]

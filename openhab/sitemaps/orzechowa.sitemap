@@ -1,0 +1,13 @@
+sitemap orzechowa label="Orzechowa" {
+    Frame label="Date" {
+        Text item=Date
+    }
+
+    Frame {
+        Switch item=Office_Light
+    }
+
+    Frame {
+        Group item=GF
+    }
+}

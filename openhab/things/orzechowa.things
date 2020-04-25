@@ -1,0 +1,8 @@
+ntp:ntp:currentTime  [ hostname="nl.pool.ntp.org", refreshInterval=60, refreshNtp=30 ]
+
+Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {
+  Thing mqtt:topic:pshActor1 {
+    Channels:
+      Type switch : gfOfficeCeiling  [ stateTopic="/Pi1/Out/Office/Ceiling" , commandTopic="/Pi1/In/Office/Ceiling", on="ON", off="OFF"]
+    }
+}

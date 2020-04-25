@@ -10,15 +10,22 @@ def button_released(device):
 
 class LightPoint(Point):
 
-    def __init__(self, id, controlPin, buttonPin):
+    def __init__(self, id, controlPin, buttonPin, comm_service):
         Point.__init__(self, id=id, controlPin=controlPin)
         self.buttonPin = buttonPin
         self.button = Button(buttonPin)
         self.led = LED(controlPin)
         self.button.when_released = lambda: button_released(self)
+        self.comm_service = comm_service
 
     def notifyCurrentState(self):
+        message = None
         print("Light {id} state {state}".format(id=self.id, state=self.led.is_lit))
+        if self.led.is_lit:
+            message = COMMAND_ON
+        else:
+            message = COMMAND_OFF
+        self.comm_service.sendStatusUpdate(point_id=self.id, message=message)
     
     def updateStatus(self, point_id, message):
         if message == COMMAND_OFF:

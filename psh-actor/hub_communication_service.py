@@ -44,6 +44,15 @@ class HubCommunicationService:
             return None
         return channel[idx+len(topic_indicator)-1:len(channel)]
 
+    def get_channel(self, point_id):
+        # topic format /Actor/Out/PointId
+        return "{sep}{act}{sep}{tout}{id}".format(
+            sep=NAME_SEPARATOR, 
+            tout=TOPIC_OUT, 
+            act=self.client_name,
+            id=point_id)
+
+
     def on_message(self, client, userdata, message):
         topic = message.topic
         payload = str(message.payload.decode("utf-8"))
@@ -56,8 +65,10 @@ class HubCommunicationService:
         print("Subscribing to topic {}".format(topic))
         self.client.subscribe(topic)
 
-    def sendStatusUpdate(self, channel, message):
-        self.client.publish(topic=channel, payload=message)
+    def sendStatusUpdate(self, point_id, message):
+        topic = self.get_channel(point_id)
+        self.client.publish(topic=topic, payload=message)
+        print("Msg snd: {0} msg: {1}".format(topic, message))
 
     def process_message(self, channel, message):
         point_id = self.get_point_id(channel)

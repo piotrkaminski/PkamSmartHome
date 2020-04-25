@@ -1,0 +1,9 @@
+Group    Home           "Orzechowa"   <house>                            ["Building"]
+
+Group    GF             "Parter"      <groundfloor>   (Home)             ["GroundFloor"]
+
+Group    Office         "Biuro"       <office>        (GF)             ["Room"]
+
+Switch   Office_Light   "Światło Sufit"     <light>         (Office, gLight)   ["Lighting", "Switchable"]   {channel="mqtt:topic:pshActor1:gfOfficeCeiling"}
+
+DateTime Date  "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]"  { channel="ntp:ntp:currentTime:dateTime" }

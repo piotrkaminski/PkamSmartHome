@@ -11,11 +11,11 @@ class RoomsService:
     def __init__(self):
         self.rooms = []
 
-    def initialize(self, configuration):
+    def initialize(self, configuration, comm_service):
         rooms = configuration.get(CONFIG_ROOMS)
         for room in rooms:
             room_obj = Room(room.get(CONFIG_ROOM_NAME))
-            room_obj.initialize(room.get(CONFIG_ROOM_POINTS))
+            room_obj.initialize(configuration=room.get(CONFIG_ROOM_POINTS), comm_service=comm_service)
             self.rooms.append(room_obj)
 
     def get_room_name(self, point_id):

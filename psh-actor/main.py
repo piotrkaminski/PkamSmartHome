@@ -7,13 +7,13 @@ class Main:
 
     def __init__(self):
         self.config_service = ConfigurationService()
-        self.communication_service = HubCommunicationService()
+        self.comm_service = HubCommunicationService()
         self.rooms_service = RoomsService()
 
     def main(self):
-        configuration = self.config_service.read_configuration()
-        self.rooms_service.initialize(configuration)
-        self.communication_service.initialize(configuration, self.rooms_service)
+        config = self.config_service.read_configuration()
+        self.rooms_service.initialize(configuration=config, comm_service=self.comm_service)
+        self.comm_service.initialize(configuration=config, rooms_service=self.rooms_service)
         pause()
 
 main = Main()
