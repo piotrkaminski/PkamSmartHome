@@ -19,6 +19,8 @@ class RoomsService:
             self.rooms.append(room_obj)
 
     def get_room_name(self, point_id):
+        if point_id is None:
+            return None
         idx = point_id[1:len(point_id)].find(NAME_SEPARATOR)
         if idx < 0:
             return None

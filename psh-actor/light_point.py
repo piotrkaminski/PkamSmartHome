@@ -1,7 +1,7 @@
 from constants import COMMAND_ON
 from constants import COMMAND_OFF
 
-from gpiozero import LED, Button
+from gpiozero import LED, Button, DigitalOutputDevice
 from point import Point
 from time import sleep
 
@@ -13,15 +13,15 @@ class LightPoint(Point):
     def __init__(self, id, controlPin, buttonPin, comm_service):
         Point.__init__(self, id=id, controlPin=controlPin)
         self.buttonPin = buttonPin
-        self.button = Button(buttonPin)
-        self.led = LED(controlPin)
+        self.button = Button(pin=buttonPin, hold_time=0.5)
+        self.led = DigitalOutputDevice(controlPin)
         self.button.when_released = lambda: button_released(self)
         self.comm_service = comm_service
 
     def notifyCurrentState(self):
         message = None
-        print("Light {id} state {state}".format(id=self.id, state=self.led.is_lit))
-        if self.led.is_lit:
+        print("Light {id} state {state}".format(id=self.id, state=self.led.value))
+        if self.led.value == 1:
             message = COMMAND_ON
         else:
             message = COMMAND_OFF
@@ -45,7 +45,7 @@ class LightPoint(Point):
         print("Disabled point {0}".format(self.id))
 
     def toggle(self):
-        if self.led.is_lit:
+        if self.led.value == 1:
             self.disable()
         else:
             self.enable()
