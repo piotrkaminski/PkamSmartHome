@@ -11,12 +11,27 @@ class PointFactory:
     def __init__(self):
         pass
 
-    def createPoint(self, type, room_name, configuration, comm_service):
+    def createPoint(self, room_name, configuration, comm_service):
+        point_name = configuration.get(CONFIG_POINT_NAME)
+        if point_name is None or point_name == "":
+            raise ValueError("Unknown point in room {}".format(room_name))
+        if room_name is None or room_name == "":
+            raise ValueError("Point {} to be added to unknown room".format(configuration))
+        
+        point_id = NAME_SEPARATOR + room_name + NAME_SEPARATOR + point_name
+        
+        ctlPin = configuration.get(CONFIG_POINT_CONTROLPIN)
+        if ctlPin is None or ctlPin == "":
+            raise ValueError("Point {} does not have {} defined".format(point_id, CONFIG_POINT_CONTROLPIN))
+        btnPin = configuration.get(CONFIG_POINT_BUTTONPIN)
+        if btnPin is None or btnPin == "":
+            raise ValueError("Point {} does not have {} defined".format(point_id, CONFIG_POINT_BUTTONPIN))
+
         point_type = configuration.get(CONFIG_POINT_TYPE)
         if point_type == CONFIG_POINT_TYPE_LIGHT:
-            return LightPoint(id=NAME_SEPARATOR + room_name + NAME_SEPARATOR + configuration.get(CONFIG_POINT_NAME),
-                controlPin=configuration.get(CONFIG_POINT_CONTROLPIN),
-                buttonPin=configuration.get(CONFIG_POINT_BUTTONPIN),
+            return LightPoint(id=point_id,
+                controlPin=ctlPin,
+                buttonPin=btnPin,
                 comm_service=comm_service)
         else:
-            raise Exception("Unrecognized point type: {}".format(point_type))
+            raise ValueError("Unrecognized point type: {}".format(point_type))
