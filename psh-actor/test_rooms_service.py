@@ -43,3 +43,26 @@ class RoomsServiceTest(TestCase):
 
         service.updateStatus(point_id=None, message="ON")
         room_mock.updateStatus.assert_not_called()
+
+    def test_initialize_sucess(self):
+        conf = {
+            "Rooms": [
+                {
+                    "Name": "Office",
+                    "Points": []
+                }, {
+                    "Name": "LivingRoom",
+                    "Points": []
+                }
+            ]
+        }
+        service = RoomsService()
+        service.initialize(configuration=conf, comm_service=None)
+        self.assertEqual(2, len(service.rooms))
+        self.assertEqual("Office", service.rooms[0].name)
+        self.assertEqual("LivingRoom", service.rooms[1].name)
+
+    def test_initalize_empty_config(self):
+        conf = {}
+        service = RoomsService()
+        service.initialize(configuration=conf, comm_service=None)     

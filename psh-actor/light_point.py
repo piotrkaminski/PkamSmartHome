@@ -4,6 +4,7 @@ from constants import COMMAND_OFF
 from gpiozero import LED, Button, DigitalOutputDevice
 from point import Point
 from time import sleep
+import logging
 
 def button_released(device):
     device.toggle()
@@ -20,7 +21,7 @@ class LightPoint(Point):
 
     def notifyCurrentState(self):
         message = None
-        print("Light {id} state {state}".format(id=self.id, state=self.led.value))
+        logging.info("Light {id} state {state}".format(id=self.id, state=self.led.value))
         if self.led.value == 1:
             message = COMMAND_ON
         else:
@@ -34,15 +35,15 @@ class LightPoint(Point):
             if message == COMMAND_ON:
                 self.enable()
             else:
-                print("Unrecognized command {cmd} for point {id}, skipped.".format(cmd=message, id=self.id))
+                logging.error("Unrecognized command {cmd} for point {id}, skipped.".format(cmd=message, id=self.id))
 
     def enable(self):
         self.led.on()
-        print("Enabled point {0}".format(self.id))
+        logging.info("Enabled point {0}".format(self.id))
 
     def disable(self):
         self.led.off()
-        print("Disabled point {0}".format(self.id))
+        logging.info("Disabled point {0}".format(self.id))
 
     def toggle(self):
         if self.led.value == 1:

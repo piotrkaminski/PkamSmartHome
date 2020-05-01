@@ -7,6 +7,7 @@ from constants import TOPIC_IN
 from constants import TOPIC_OUT
 from paho.mqtt.client import Client
 from signal import pause
+import logging
 
 
 class HubCommunicationService:
@@ -56,23 +57,23 @@ class HubCommunicationService:
     def on_message(self, client, userdata, message):
         topic = message.topic
         payload = str(message.payload.decode("utf-8"))
-        print("Msg rcv: {0} msg: {1}".format(topic, payload))
+        logging.info("Msg rcv: {0} msg: {1}".format(topic, payload))
         self.process_message(channel=topic, message=payload)
 
     def on_connect(self, client, userdata, flags, rc):
-        print("Connected to mqtt service on {0}:{1} ".format(client._host, client._port))
+        logging.info("Connected to mqtt service on {0}:{1} ".format(client._host, client._port))
         topic = self.create_topic_name()
-        print("Subscribing to topic {}".format(topic))
+        logging.info("Subscribing to topic {}".format(topic))
         self.client.subscribe(topic)
 
     def sendStatusUpdate(self, point_id, message):
         topic = self.get_channel(point_id)
         self.client.publish(topic=topic, payload=message)
-        print("Msg snd: {0} msg: {1}".format(topic, message))
+        logging.info("Msg snd: {0} msg: {1}".format(topic, message))
 
     def process_message(self, channel, message):
         point_id = self.get_point_id(channel)
         if point_id is None:
-            print("Point_id not determined for channel {0} and message {1}, skipped"
+            logging.info("Point_id not determined for channel {0} and message {1}, skipped"
                 .format(channel, message))
         self.rooms_service.updateStatus(point_id, message)

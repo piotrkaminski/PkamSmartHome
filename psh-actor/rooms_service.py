@@ -5,6 +5,7 @@ from constants import CONFIG_CONNECTIVITY
 from constants import NAME_SEPARATOR
 from hub_communication_service import HubCommunicationService
 from room import Room
+import logging
 
 class RoomsService:
 
@@ -13,6 +14,9 @@ class RoomsService:
 
     def initialize(self, configuration, comm_service):
         rooms = configuration.get(CONFIG_ROOMS)
+        if rooms is None:
+            logging.error("Configuration error, no {} definition".format(CONFIG_ROOMS))
+            return
         for room in rooms:
             room_obj = Room(room.get(CONFIG_ROOM_NAME))
             room_obj.initialize(configuration=room.get(CONFIG_ROOM_POINTS), comm_service=comm_service)
@@ -29,7 +33,7 @@ class RoomsService:
     def updateStatus(self, point_id, message):
         room_name = self.get_room_name(point_id)
         if room_name is None:
-            print("Room name not found in {0}, status update skipped".format(point_id))
+            logging.info("Room name not found in {0}, status update skipped".format(point_id))
         for room in self.rooms:
             if room.name == room_name:
                 room.updateStatus(point_id, message)
