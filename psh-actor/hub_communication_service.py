@@ -39,6 +39,8 @@ class HubCommunicationService:
         return "{sep}{name}{sep}{tin}{sep}#".format(sep=NAME_SEPARATOR, tin = TOPIC_IN, name=self.client_name)
 
     def get_point_id(self, channel):
+        if channel is None:
+            return None
         topic_indicator = NAME_SEPARATOR + TOPIC_IN + NAME_SEPARATOR
         idx = channel.find(topic_indicator)
         if idx < 0:
@@ -76,4 +78,5 @@ class HubCommunicationService:
         if point_id is None:
             logging.info("Point_id not determined for channel {0} and message {1}, skipped"
                 .format(channel, message))
-        self.rooms_service.updateStatus(point_id, message)
+        else:
+            self.rooms_service.updateStatus(point_id=point_id, message=message)
