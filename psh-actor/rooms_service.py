@@ -13,10 +13,10 @@ class RoomsService:
         self.rooms = []
 
     def initialize(self, configuration, comm_service):
-        rooms = configuration.get(CONFIG_ROOMS)
-        if rooms is None:
-            logging.error("Configuration error, no {} definition".format(CONFIG_ROOMS))
+        if configuration is None or configuration.get(CONFIG_ROOMS) is None:
+            logging.warning("Configuration error, no {} definition".format(CONFIG_ROOMS))
             return
+        rooms = configuration.get(CONFIG_ROOMS)
         for room in rooms:
             room_obj = Room(room.get(CONFIG_ROOM_NAME))
             room_obj.initialize(configuration=room.get(CONFIG_ROOM_POINTS), comm_service=comm_service)

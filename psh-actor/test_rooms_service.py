@@ -65,4 +65,11 @@ class RoomsServiceTest(TestCase):
     def test_initalize_empty_config(self):
         conf = {}
         service = RoomsService()
-        service.initialize(configuration=conf, comm_service=None)     
+        service.initialize(configuration=conf, comm_service=None)
+        self.assertEqual(0, len(service.rooms))   
+
+    
+    def test_initalize_none_config(self):
+        service = RoomsService()
+        service.initialize(configuration=None, comm_service=None) 
+        self.assertEqual(0, len(service.rooms))   

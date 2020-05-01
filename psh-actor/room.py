@@ -1,7 +1,7 @@
 from constants import CONFIG_ROOM_POINTS
 from constants import CONFIG_POINT_TYPE
-# from constants import NAME_SEPARATOR
 from point_factory import PointFactory
+import logging
 
 class Room:
 
@@ -11,6 +11,9 @@ class Room:
         self.points = []
 
     def initialize(self, configuration, comm_service):
+        if configuration is None:
+            logging.warning("Configuration warning, no points definition for room {}".format(self.name))
+            return
         for point in configuration:
             point_type = point.get(CONFIG_POINT_TYPE)
             point_obj = self.point_factory.createPoint(
@@ -21,6 +24,10 @@ class Room:
             self.points.append(point_obj)
 
     def updateStatus(self, point_id, message):
+        updated = False
         for point in self.points:
             if point.id == point_id:
                 point.updateStatus(point_id, message)
+                updated = True
+        if not updated:
+            logging.warning("No point {} in room {} to update status".format(point_id, self.name))

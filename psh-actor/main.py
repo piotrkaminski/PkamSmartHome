@@ -13,11 +13,15 @@ class Main:
         self.rooms_service = RoomsService()
 
     def main(self):
-        config = self.config_service.read_configuration()
-        self.rooms_service.initialize(configuration=config, comm_service=self.comm_service)
-        self.comm_service.initialize(configuration=config, rooms_service=self.rooms_service)
-        logging.info("System initialized")
-        pause()
+        try:
+            config = self.config_service.read_configuration()
+            self.rooms_service.initialize(configuration=config, comm_service=self.comm_service)
+            self.comm_service.initialize(configuration=config, rooms_service=self.rooms_service)
+            logging.info("System initialized")
+            pause()
+        except Exception as ex:
+            logging.fatal("Syste initialization failed due exception {}".format(ex))
+            raise ex
 
 def main():
     logging.config.fileConfig("logging.conf")

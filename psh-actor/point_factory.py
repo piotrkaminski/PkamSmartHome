@@ -19,4 +19,4 @@ class PointFactory:
                 buttonPin=configuration.get(CONFIG_POINT_BUTTONPIN),
                 comm_service=comm_service)
         else:
-            raise Exception("Unrecognized point type: {type}".format(type=point_type))
+            raise Exception("Unrecognized point type: {}".format(point_type))
