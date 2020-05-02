@@ -29,9 +29,11 @@ class PointFactory:
 
         point_type = configuration.get(CONFIG_POINT_TYPE)
         if point_type == CONFIG_POINT_TYPE_LIGHT:
-            return LightPoint(id=point_id,
+            point = LightPoint(id=point_id,
                 controlPin=ctlPin,
                 buttonPin=btnPin,
                 comm_service=comm_service)
+            point.initialize()
+            return point
         else:
             raise ValueError("Unrecognized point type: {}".format(point_type))

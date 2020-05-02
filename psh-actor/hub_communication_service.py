@@ -59,7 +59,7 @@ class HubCommunicationService:
     def on_message(self, client, userdata, message):
         topic = message.topic
         payload = str(message.payload.decode("utf-8"))
-        logging.info("Msg rcv: {0} msg: {1}".format(topic, payload))
+        logging.debug("Msg rcv: {0} msg: {1}".format(topic, payload))
         self.process_message(channel=topic, message=payload)
 
     def on_connect(self, client, userdata, flags, rc):
@@ -71,7 +71,7 @@ class HubCommunicationService:
     def sendStatusUpdate(self, point_id, message):
         topic = self.get_channel(point_id)
         self.client.publish(topic=topic, payload=message)
-        logging.info("Msg snd: {0} msg: {1}".format(topic, message))
+        logging.debug("Msg snd: {0} msg: {1}".format(topic, message))
 
     def process_message(self, channel, message):
         point_id = self.get_point_id(channel)

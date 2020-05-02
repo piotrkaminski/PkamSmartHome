@@ -6,18 +6,19 @@ from point import Point
 from time import sleep
 import logging
 
-def button_released(device):
-    device.toggle()
-
 class LightPoint(Point):
 
     def __init__(self, id, controlPin, buttonPin, comm_service):
         Point.__init__(self, id=id, controlPin=controlPin)
         self.buttonPin = buttonPin
-        self.button = Button(pin=buttonPin, hold_time=0.5)
-        self.led = DigitalOutputDevice(controlPin)
-        self.button.when_released = lambda: button_released(self)
+        self.button = None
+        self.led = None
         self.comm_service = comm_service
+    
+    def initialize(self):
+        self.button = Button(pin=self.buttonPin, hold_time=0.1)
+        self.button.when_held = self.toggle
+        self.led = DigitalOutputDevice(self.controlPin)
 
     def notifyCurrentState(self):
         message = None

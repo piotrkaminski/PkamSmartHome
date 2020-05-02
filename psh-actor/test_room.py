@@ -45,13 +45,13 @@ class RoomsTest(TestCase):
         conf = [{
                     "Name": "Ceiling",
                     "Type": "Light",
-                    "GpioControlPin": 17,
-                    "GpioButtonPin": 2
+                    "GpioControlPin": 22,
+                    "GpioButtonPin": 23
                 },{
                     "Name": "BackLight",
                     "Type": "Light",
-                    "GpioControlPin": 7,
-                    "GpioButtonPin": 4
+                    "GpioControlPin": 24,
+                    "GpioButtonPin": 25
                 }]
         room = Room("Room")
         room.initialize(configuration=conf, comm_service=None)

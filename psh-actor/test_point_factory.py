@@ -32,8 +32,8 @@ class PointFactoryTest(TestCase):
     def test_create_point_no_name(self):
         conf = {
                     "Type": "Light",
-                    "GpioControlPin": 17,
-                    "GpioButtonPin": 2
+                    "GpioControlPin": 18,
+                    "GpioButtonPin": 3
                 }
         room_name = "RoomU"
         comm_service = Mock()
