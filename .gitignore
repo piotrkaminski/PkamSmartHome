@@ -130,3 +130,6 @@ dmypy.json
 
 # Visual Studio Code
 .vscode
+
+# PkamSmartHome settings
+openhab/backup/*

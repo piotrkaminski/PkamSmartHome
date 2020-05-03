@@ -1,0 +1,16 @@
+[Unit]
+Description=PkamSmartHome Actor
+After=network-online.target mosquitto.service
+
+[Service]
+Type=simple
+NotifyAccess=main
+ExecStart=/home/pi/PkamSmartHome/psh-actor/start.sh
+# Restart=always
+# RestartSec=1
+User=pi
+WorkingDirectory=/home/pi/PkamSmartHome/psh-actor/
+
+
+[Install]
+WantedBy=multi-user.target
