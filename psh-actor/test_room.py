@@ -70,3 +70,15 @@ class RoomsTest(TestCase):
         room = Room("Room1")
         room.initialize(configuration=None, comm_service=None) 
         self.assertEqual(0, len(room.points))   
+
+    def test_reset(self):
+        room = Room("Room1")
+        point1 = Mock()
+        point2 = Mock()
+        room.points.append(point1)
+        room.points.append(point2) 
+
+        room.reset()
+
+        point1.reset.assert_called()
+        point2.reset.assert_called() 

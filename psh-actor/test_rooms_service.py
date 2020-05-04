@@ -73,3 +73,15 @@ class RoomsServiceTest(TestCase):
         service = RoomsService()
         service.initialize(configuration=None, comm_service=None) 
         self.assertEqual(0, len(service.rooms))   
+
+    def test_reset(self):
+        service = RoomsService()
+        room1 = Mock()
+        room2 = Mock()
+        service.rooms.append(room1)
+        service.rooms.append(room2)
+
+        service.reset()
+
+        room1.reset.assert_called()
+        room2.reset.assert_called()   

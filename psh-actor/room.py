@@ -21,6 +21,10 @@ class Room:
                 comm_service=comm_service)
             self.points.append(point_obj)
 
+    def reset(self):
+        for point in self.points:
+            point.reset()
+
     def updateStatus(self, point_id, message):
         updated = False
         for point in self.points:

@@ -37,3 +37,7 @@ class RoomsService:
         for room in self.rooms:
             if room.name == room_name:
                 room.updateStatus(point_id, message)
+
+    def reset(self):
+        for room in self.rooms:
+            room.reset()

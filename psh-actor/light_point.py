@@ -29,7 +29,7 @@ class LightPoint(Point):
             message = COMMAND_OFF
         self.comm_service.sendStatusUpdate(point_id=self.id, message=message)
     
-    def updateStatus(self, point_id, message):
+    def updateStatus(self, message):
         if message == COMMAND_OFF:
             self.disable()
         else:
@@ -37,6 +37,9 @@ class LightPoint(Point):
                 self.enable()
             else:
                 logging.error("Unrecognized command {cmd} for point {id}, skipped.".format(cmd=message, id=self.id))
+
+    def reset(self):
+        self.disable()
 
     def enable(self):
         self.led.on()

@@ -44,7 +44,7 @@ class LightPointTest(TestCase):
             comm_service=None)
         point.led = led
 
-        point.updateStatus(point_id=None, message="ON")
+        point.updateStatus(message="ON")
 
         led.on.assert_called()
 
@@ -57,7 +57,7 @@ class LightPointTest(TestCase):
             comm_service=None)
         point.led = led
 
-        point.updateStatus(point_id=None, message="ON")
+        point.updateStatus(message="ON")
 
         led.on.assert_called()
 
@@ -70,10 +70,23 @@ class LightPointTest(TestCase):
             comm_service=None)
         point.led = led
 
-        point.updateStatus(point_id=None, message="AnyMessage")
+        point.updateStatus(message="AnyMessage")
 
         led.on.assert_not_called()
 
+    def test_reset(self):
+        led = Mock()
+        point = LightPoint(
+            id="/RoomB/PointYU", 
+            controlPin=11, 
+            buttonPin=12, 
+            comm_service=None)
+        point.led = led
+
+        point.reset()
+
+        led.on.assert_not_called()
+        led.off.assert_called()
 
     def test_enable(self):
         led = Mock()

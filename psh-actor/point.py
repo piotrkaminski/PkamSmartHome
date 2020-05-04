@@ -4,5 +4,12 @@ class Point:
         self.id = id
         self.controlPin = controlPin
 
-    def updateStatus(self, point_id, message):
+    def initialize(self):
+        pass
+
+    def updateStatus(self, message):
+        pass
+
+
+    def reset(self):
         pass

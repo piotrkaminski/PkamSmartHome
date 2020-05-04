@@ -43,6 +43,13 @@ Source: https://www.openhab.org/docs/installation/linux.html
     1. NTP Binding
     2. MQTT Binding
 
+## Install required dependecies
+
+1. Install Python Pyho 
+    ```
+    pip3 install paho-mqtt
+    ```
+
 ## PkamSmartHome Actor installaction
 
 1. Download project
