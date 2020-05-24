@@ -1,9 +1,13 @@
-Group    Home           "Orzechowa"   <house>                            ["Building"]
+Group    Home           "Orzechowa"         <house>                             ["Building"]
 
-Group    GF             "Parter"      <groundfloor>   (Home)             ["GroundFloor"]
+Group    GF             "Parter"            <groundfloor>   (Home)              ["GroundFloor"]
+Group    Office         "Biuro"             <office>        (GF)                ["Room"]
+Switch   Office_Light   "Biuro Sufit"       <light>         (Office, gLight)    ["Lighting", "Switchable"]   {channel="mqtt:topic:pshActor1:gfOfficeCeiling"}
 
-Group    Office         "Biuro"       <office>        (GF)             ["Room"]
+Group    FF             "Piętro"            <firstfloor>   (Home)               ["FirstFloor"]
+Group    Bedroom        "Pokój Marysi"      <bedroom>      (FF)                 ["Bedroom"]
+Switch   Bedroom_Light  "Marysia Sufit"     <light>        (Bedroom, gLight)    ["Lighting", "Switchable"]   {channel="mqtt:topic:pshActor1:ffMarysiaCeiling"}
 
-Switch   Office_Light   "Światło Sufit"     <light>         (Office, gLight)   ["Lighting", "Switchable"]   {channel="mqtt:topic:pshActor1:gfOfficeCeiling"}
+Group:Switch:OR(ON, OFF)   gLight   "Light"     <light>   (Home)              ["Lighting", "Switchable"]
 
 DateTime Date  "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar> { channel="ntp:ntp:currentTime:dateTime" }

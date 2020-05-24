@@ -133,3 +133,4 @@ dmypy.json
 
 # PkamSmartHome settings
 openhab/backup/*
+psh-actor/logs/*

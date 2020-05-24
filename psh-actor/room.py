@@ -29,7 +29,7 @@ class Room:
         updated = False
         for point in self.points:
             if point.id == point_id:
-                point.updateStatus(point_id, message)
+                point.updateStatus(message)
                 updated = True
         if not updated:
             logging.warning("No point {} in room {} to update status".format(point_id, self.name))

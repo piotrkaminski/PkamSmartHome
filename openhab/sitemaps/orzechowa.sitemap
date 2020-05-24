@@ -5,9 +5,11 @@ sitemap orzechowa label="Orzechowa" {
 
     Frame {
         Switch item=Office_Light
+        Switch item=Bedroom_Light
     }
 
     Frame {
         Group item=GF
+        Group item=FF
     }
 }
