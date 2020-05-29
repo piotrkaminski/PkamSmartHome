@@ -22,7 +22,7 @@ class LightPoint(Point):
 
     def notifyCurrentState(self):
         message = None
-        logging.info("Light {id} state {state}".format(id=self.id, state=self.led.value))
+        logging.info("Notify light {id} state to {state}".format(id=self.id, state=self.led.value))
         if self.led.value == 1:
             message = COMMAND_ON
         else:

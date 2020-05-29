@@ -3,9 +3,14 @@ sitemap orzechowa label="Orzechowa" {
         Text item=Date
     }
 
-    Frame {
+    Frame label="Gabinet" {
         Switch item=Office_Light
-        Switch item=Bedroom_Light
+    }
+
+    Frame label="Marysia" {
+        Switch item=Marysia_Light_1_3
+        Switch item=Marysia_Light_2_3
+        Switch item=gMarysiaCeilingLight
     }
 
     Frame {

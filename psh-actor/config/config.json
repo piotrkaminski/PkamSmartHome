@@ -2,7 +2,7 @@
     "General": {
         "Name": "Pi1"
     },
-    "Connectivity" : {
+    "Connectivity": {
         "ClientName": "Pi1",
         "MqttIp": "localhost",
         "MqttPort": 1883
@@ -14,8 +14,25 @@
                 {
                     "Name": "Ceiling",
                     "Type": "Light",
-                    "GpioControlPin": 17,
-                    "GpioButtonPin": 2
+                    "GpioControlPin": 2,
+                    "GpioButtonPin": 3
+                }
+            ]
+        },
+        {
+            "Name": "Marysia",
+            "Points": [
+                {
+                    "Name": "Ceiling13",
+                    "Type": "Light",
+                    "GpioControlPin": 4,
+                    "GpioButtonPin": 17
+                },
+                {
+                    "Name": "Ceiling23",
+                    "Type": "Light",
+                    "GpioControlPin": 22,
+                    "GpioButtonPin": 10
                 }
             ]
         }
