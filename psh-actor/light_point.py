@@ -14,6 +14,7 @@ class LightPoint(Point):
         self.button = None
         self.led = None
         self.comm_service = comm_service
+        logging.info("Light point {0} initialized, Ctn: {1}, Btn: {2}".format(self.id, self.controlPin, self.buttonPin))
     
     def initialize(self):
         self.button = Button(pin=self.buttonPin, hold_time=0.1)

@@ -38,10 +38,12 @@ Source: https://www.openhab.org/docs/installation/linux.html
 ## OpenHab configuration
 
 1. Open OpenHab web console and choose Standard COnfiguration.
-2. Open OpenHan and click Paper UI console
-3. For Add-ons -> Bindins install followin bindings:
+1. Open OpenHan and click Paper UI console
+1. For Add-ons -> Bindins install following bindings:
     1. NTP Binding
-    2. MQTT Binding
+    1. MQTT Binding
+1. For Add-ons -> Misc install for following
+    1. HomeKit Integration
 
 ## Install required dependecies
 
