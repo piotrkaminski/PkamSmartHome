@@ -18,21 +18,30 @@
                     "GpioButtonPin": 3
                 }
             ]
-        },
-        {
+        },{
+            "Name": "Livingroom",
+            "Points": [
+                {
+                    "Name": "LedTV",
+                    "Type": "Light",
+                    "GpioControlPin": 4,
+                    "GpioButtonPin": 17
+                }
+            ]
+        },{
             "Name": "Marysia",
             "Points": [
                 {
                     "Name": "Ceiling13",
                     "Type": "Light",
-                    "GpioControlPin": 4,
-                    "GpioButtonPin": 17
+                    "GpioControlPin": 12,
+                    "GpioButtonPin": 16
                 },
                 {
                     "Name": "Ceiling23",
                     "Type": "Light",
-                    "GpioControlPin": 22,
-                    "GpioButtonPin": 10
+                    "GpioControlPin": 20,
+                    "GpioButtonPin": 21
                 }
             ]
         }

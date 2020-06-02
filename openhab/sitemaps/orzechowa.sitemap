@@ -7,11 +7,16 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Office_Light
     }
 
-    Frame label="Marysia" {
-        Switch item=Marysia_Light_1_3
-        Switch item=Marysia_Light_2_3
-        Switch item=gMarysiaCeilingLight
+
+    Frame label="Salon" {
+        Switch item=Livingroom_LedTV
     }
+
+//   Frame label="Marysia" {
+//       Switch item=Marysia_Light_1_3
+//       Switch item=Marysia_Light_2_3
+//       Switch item=gMarysiaCeilingLight
+//   }
 
     Frame {
         Group item=GF
