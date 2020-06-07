@@ -12,6 +12,12 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Livingroom_LedTV
     }
 
+    Frame label="Jadalnia" {
+        Switch item=Diningroom
+        Switch item=Diningroom_1_3
+        Switch item=Diningroom_2_3
+    }
+
 //   Frame label="Marysia" {
 //       Switch item=Marysia_Light_1_3
 //       Switch item=Marysia_Light_2_3

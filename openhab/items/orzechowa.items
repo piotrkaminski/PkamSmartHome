@@ -6,6 +6,11 @@ Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)
 Group    Livingroom         "Salon"             <video>        (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomLedTV"}
 
+Group    Diningroom         "Jadalnia"             <presence>        (GF)
+Switch   Diningroom_1_3     "Jadalnia 1/3"         <light>         (Diningroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling13"}
+Switch   Diningroom_2_3     "Jadalnia 2/3"         <light>         (Diningroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling23"}
+Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light>   (Diningroom, gLight)  ["Lighting"]
+
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
 //Switch   Marysia_Light_1_3  "Marysia Sufit 1/3"     <light>        (Marysia, gMarysiaCeilingLight, gLight)     {channel="mqtt:topic:pshActor1:ffMarysiaCeiling13"}

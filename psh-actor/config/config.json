@@ -28,6 +28,21 @@
                     "GpioButtonPin": 17
                 }
             ]
+        } ,{
+            "Name": "Diningroom",
+            "Points": [
+                {
+                    "Name": "Ceiling23",
+                    "Type": "Light",
+                    "GpioControlPin": 10,
+                    "GpioButtonPin": 27
+                },                 {
+                    "Name": "Ceiling13",
+                    "Type": "Light",
+                    "GpioControlPin": 9,
+                    "GpioButtonPin": 22
+                }
+            ]
         },{
             "Name": "Marysia",
             "Points": [
