@@ -26,6 +26,16 @@
                     "Type": "Light",
                     "GpioControlPin": 4,
                     "GpioButtonPin": 17
+                },{
+                    "Name": "Ceiling13",
+                    "Type": "Light",
+                    "GpioControlPin": 11,
+                    "GpioButtonPin": 5
+                },{
+                    "Name": "Ceiling23",
+                    "Type": "Light",
+                    "GpioControlPin": 0,
+                    "GpioButtonPin": 6
                 }
             ]
         } ,{

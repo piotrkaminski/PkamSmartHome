@@ -5,9 +5,9 @@ Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {
     Channels:
       Type switch : gfOfficeCeiling  [ stateTopic="/Pi1/Out/Office/Ceiling" , commandTopic="/Pi1/In/Office/Ceiling", on="ON", off="OFF"]
       Type switch : gfLivingroomLedTV  [ stateTopic="/Pi1/Out/Livingroom/LedTV" , commandTopic="/Pi1/In/Livingroom/LedTV", on="ON", off="OFF"]
+      Type switch : gfLivingroomCeiling13  [ stateTopic="/Pi1/Out/Livingroom/Ceiling13" , commandTopic="/Pi1/In/Livingroom/Ceiling13", on="ON", off="OFF"]
+      Type switch : gfLivingroomCeiling23  [ stateTopic="/Pi1/Out/Livingroom/Ceiling23" , commandTopic="/Pi1/In/Livingroom/Ceiling23", on="ON", off="OFF"]
       Type switch : gfDiningroomCeiling13  [ stateTopic="/Pi1/Out/Diningroom/Ceiling13" , commandTopic="/Pi1/In/Diningroom/Ceiling13", on="ON", off="OFF"]
       Type switch : gfDiningroomCeiling23  [ stateTopic="/Pi1/Out/Diningroom/Ceiling23" , commandTopic="/Pi1/In/Diningroom/Ceiling23", on="ON", off="OFF"]
-//      Type switch : ffMarysiaCeiling13  [ stateTopic="/Pi1/Out/Marysia/Ceiling13" , commandTopic="/Pi1/In/Marysia/Ceiling13", on="ON", off="OFF"]
-//      Type switch : ffMarysiaCeiling23  [ stateTopic="/Pi1/Out/Marysia/Ceiling23" , commandTopic="/Pi1/In/Marysia/Ceiling23", on="ON", off="OFF"]
     }
 }

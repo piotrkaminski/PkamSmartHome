@@ -10,10 +10,13 @@ sitemap orzechowa label="Orzechowa" {
 
     Frame label="Salon" {
         Switch item=Livingroom_LedTV
+        Switch item=gLivingroomCeilingLight
+        Switch item=Livingroom_1_3
+        Switch item=Livingroom_2_3
     }
 
     Frame label="Jadalnia" {
-        Switch item=Diningroom
+        Switch item=gDiningroomCeilingLight
         Switch item=Diningroom_1_3
         Switch item=Diningroom_2_3
     }
@@ -24,8 +27,9 @@ sitemap orzechowa label="Orzechowa" {
 //       Switch item=gMarysiaCeilingLight
 //   }
 
-    Frame {
+    Frame label="Dom" {
         Group item=GF
         Group item=FF
+        Switch item=gLight
     }
 }

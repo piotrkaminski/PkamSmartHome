@@ -5,19 +5,18 @@ Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)
 
 Group    Livingroom         "Salon"             <video>        (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomLedTV"}
+Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomCeiling13"}
+Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomCeiling23"}
+Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  ["Lighting"]
 
 Group    Diningroom         "Jadalnia"             <presence>        (GF)
-Switch   Diningroom_1_3     "Jadalnia 1/3"         <light>         (Diningroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling13"}
-Switch   Diningroom_2_3     "Jadalnia 2/3"         <light>         (Diningroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling23"}
+Switch   Diningroom_1_3     "Jadalnia 1/3"         <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling13"}
+Switch   Diningroom_2_3     "Jadalnia 2/3"         <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling23"}
 Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light>   (Diningroom, gLight)  ["Lighting"]
 
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
-//Switch   Marysia_Light_1_3  "Marysia Sufit 1/3"     <light>        (Marysia, gMarysiaCeilingLight, gLight)     {channel="mqtt:topic:pshActor1:ffMarysiaCeiling13"}
-//Switch   Marysia_Light_2_3  "Marysia Sufit 2/3"     <light>        (Marysia, gMarysiaCeilingLight, gLight)     {channel="mqtt:topic:pshActor1:ffMarysiaCeiling23"}
 
-Group:Switch:OR(ON, OFF)   gMarysiaCeilingLight   "Marysia Sufit"     <light>   (Home) 
-
-Group:Switch:OR(ON, OFF)   gLight   "Wszystkie światła"     <light>   (Home)   
+Group:Switch:AND(ON, OFF)   gLight   "Wszystkie światła"     <light>   (Home)   
 
 DateTime Date  "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
