@@ -16,6 +16,11 @@ Source: https://www.instructables.com/id/Installing-MQTT-BrokerMosquitto-on-Rasp
 As root user execute following commands:
 
 ```
+sudo apt update
+sudo apt install openjdk-8-jdk
+
+sudo apt-get install screen mc vim git htop
+
 wget -qO - 'https://bintray.com/user/downloadSubjectPublicKey?username=openhab' | sudo apt-key add -
 sudo apt-get install apt-transport-https
 
@@ -37,11 +42,11 @@ Source: https://www.openhab.org/docs/installation/linux.html
 
 ## OpenHab configuration
 
-1. Open OpenHab web console and choose Standard COnfiguration.
-1. Open OpenHan and click Paper UI console
+1. Open OpenHab web console and choose Standard Configuration.
+1. Open OpenHab and click Paper UI console
 1. For Add-ons -> Bindins install following bindings:
-    1. NTP Binding
     1. MQTT Binding
+    1. NTP Binding
 1. For Add-ons -> Misc install for following
     1. HomeKit Integration
 
@@ -56,15 +61,23 @@ Source: https://www.openhab.org/docs/installation/linux.html
 
 1. Download project
     1. Add ssh key to GitHab
-    1. Download project from git@github.com:piotrkaminski/PkamSmartHome.git
+    1. Download project from git
+   ```
+   git clone git@github.com:piotrkaminski/PkamSmartHome.git
+   ```
 1. Update OpenHab configuration
     ```
-    cd PROJECT_DIR/openhab
+    cd ~/PkamSmartHome/openhab
     sudo ./install-config.sh
     ```
+1. Create log directory
+   ```
+   cd ~/PkamSmartHome/psh-actor 
+   mkdir logs
+   ```
 1. Install service and set to be automaticaly started after machine boots
     ```
-    cd PROJECT_DIR/linux-sertice
+    cd PROJECT_DIR/linux-service
     sudo ./install-service.sh
     ```
 1. Service psh-actor is allready started. Status can be checked by 
