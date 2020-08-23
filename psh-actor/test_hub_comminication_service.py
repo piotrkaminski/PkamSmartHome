@@ -15,6 +15,16 @@ class HubCommunicationServiceTest(TestCase):
     def test_get_point_id_none(self):
         service = HubCommunicationService()
         self.assertEqual(None, service.get_point_id(None))
+    
+    def test_is_admin_channel_ok(self):
+    	  service = HubCommunicationService()
+    	  result = service.is_admin_channel("/ClientY/Admin")
+    	  self.assertEqual(True, result)
+    	  
+    def test_is_admin_channel_not_ok(self):
+        service = HubCommunicationService()
+        result = service.is_admin_channel("/ClinetYY/ADM")
+        self.assertEqual(False, result)
 
     def test_create_topic_name_sucess(self):
         service = HubCommunicationService()
@@ -34,13 +44,14 @@ class HubCommunicationServiceTest(TestCase):
         service.sendStatusUpdate("/Room3/Point4", "message")
         mqtt_client.publish.assert_called_with(topic="/ClientE/Out/Room3/Point4",payload="message")
 
-    def test_process_message_success(self):
+    def test_process_message__ctrl_success(self):
         service = HubCommunicationService()
         rooms_service = Mock()
         service.rooms_service = rooms_service
 
         service.process_message(channel="/ClientA/In/Room3/Point3", message="message")
         rooms_service.updateStatus.assert_called_with(point_id="/Room3/Point3",message="message")
+        rooms_service.reset.assert_not_called()
 
     def test_process_message_none_point(self):
         service = HubCommunicationService()
@@ -49,6 +60,15 @@ class HubCommunicationServiceTest(TestCase):
 
         service.process_message("/ClientA/In", "message")
         rooms_service.updateStatus.assert_not_called()
+
+    def test_process_message_admin_sucess(self):
+        service = HubCommunicationService()
+        rooms_service = Mock()
+        service.rooms_service = rooms_service
+
+        service.process_message(channel="/ClientA/Admin", message="message")
+        rooms_service.updateStatus.assert_not_called()
+        rooms_service.reset.assert_called()
 
     def test_on_message(self):
         service = HubCommunicationService()

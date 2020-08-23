@@ -47,6 +47,16 @@ class HubCommunicationService:
             return None
         return channel[idx+len(topic_indicator)-1:len(channel)]
 
+    def is_admin_channel(self, channel):
+        if channel is None:
+            return False
+        admin_indicator = NAME_SEPARATOR + TOPIC_ADMIN + NAME_SEPARATOR
+        idx = channel.find(admin_indicator)
+        if idx < 0:
+            return False
+        return True
+        
+
     def get_channel(self, point_id):
         # topic format /Actor/Out/PointId
         return "{sep}{act}{sep}{tout}{id}".format(
@@ -74,9 +84,16 @@ class HubCommunicationService:
         logging.debug("Msg snd: {0} msg: {1}".format(topic, message))
 
     def process_message(self, channel, message):
+        if self.is_admin_channel(channel):
+            self.process_admin_messsage(channel, message)
+
         point_id = self.get_point_id(channel)
         if point_id is None:
             logging.info("Point_id not determined for channel {0} and message {1}, skipped"
                 .format(channel, message))
         else:
             self.rooms_service.updateStatus(point_id=point_id, message=message)
+            
+    def process_admin_message(self, channel, message):
+        if message == COMMAND_RESET:
+            self.rooms_service.reset()

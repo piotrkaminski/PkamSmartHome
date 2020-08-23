@@ -49,6 +49,8 @@ Source: https://www.openhab.org/docs/installation/linux.html
     1. NTP Binding
 1. For Add-ons -> Misc install for following
     1. HomeKit Integration
+1. For Configuration -> Services -> IO -> HomeKit Integration apply configuration
+    1. Network Interface -> WiFi Ip address
 
 ## Install required dependecies
 
@@ -84,3 +86,8 @@ Source: https://www.openhab.org/docs/installation/linux.html
     ```
     sudo systemctl status psh-actor
     ```
+
+## Additional installation component
+
+1. It is usefull to enable SSL interface on Raspberry
+    1. Raspberry Start -> Preferences -> Raspberry Pi Configuration -> Interfaces -> SSH enabled
