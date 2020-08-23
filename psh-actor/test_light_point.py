@@ -76,17 +76,19 @@ class LightPointTest(TestCase):
 
     def test_reset(self):
         led = Mock()
+        comm_service = Mock()
         point = LightPoint(
             id="/RoomB/PointYU", 
             controlPin=11, 
             buttonPin=12, 
-            comm_service=None)
+            comm_service=comm_service)
         point.led = led
 
         point.reset()
 
         led.on.assert_not_called()
         led.off.assert_called()
+        comm_service.sendStatusUpdate.assert_called()
 
     def test_enable(self):
         led = Mock()

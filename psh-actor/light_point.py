@@ -40,7 +40,8 @@ class LightPoint(Point):
                 logging.error("Unrecognized command {cmd} for point {id}, skipped.".format(cmd=message, id=self.id))
 
     def reset(self):
-        self.disable()
+        self.updateStatus(COMMAND_OFF)
+        self.notifyCurrentState()
 
     def enable(self):
         self.led.on()
