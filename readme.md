@@ -59,7 +59,7 @@ Source: https://www.openhab.org/docs/installation/linux.html
     pip3 install paho-mqtt
     ```
 
-## PkamSmartHome Actor installaction
+## PkamSmartHome Actor installation
 
 1. Download project
     1. Add ssh key to GitHab
@@ -91,3 +91,23 @@ Source: https://www.openhab.org/docs/installation/linux.html
 
 1. It is usefull to enable SSL interface on Raspberry
     1. Raspberry Start -> Preferences -> Raspberry Pi Configuration -> Interfaces -> SSH enabled
+
+
+# Executabes Update
+
+## PkamSmartHome Actor update
+
+1. Update code
+   ```
+   cd ~/PkamSmartHome 
+   git pull
+   sudo systemctl restart psh-actor
+   ```
+
+# Reset installation (put all points into standard mode)
+
+## Reset all points in PkamSmartHome Actor
+   ```
+   cd ~/PkamSmartHome/psh-actor 
+   ./reset-all-points.sh
+   ```
