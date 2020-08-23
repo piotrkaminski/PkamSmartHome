@@ -66,7 +66,7 @@ class HubCommunicationServiceTest(TestCase):
         rooms_service = Mock()
         service.rooms_service = rooms_service
 
-        service.process_message(channel="/ClientA/Admin", message="message")
+        service.process_message(channel="/ClientA/Admin", message="RESET")
         rooms_service.updateStatus.assert_not_called()
         rooms_service.reset.assert_called()
 

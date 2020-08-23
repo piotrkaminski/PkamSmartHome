@@ -5,6 +5,8 @@ from constants import CONFIG_CONNECTIVITY_MQTTPORT
 from constants import NAME_SEPARATOR
 from constants import TOPIC_IN
 from constants import TOPIC_OUT
+from constants import TOPIC_ADMIN
+from constants import COMMAND_RESET
 from paho.mqtt.client import Client
 from signal import pause
 import logging
@@ -50,7 +52,7 @@ class HubCommunicationService:
     def is_admin_channel(self, channel):
         if channel is None:
             return False
-        admin_indicator = NAME_SEPARATOR + TOPIC_ADMIN + NAME_SEPARATOR
+        admin_indicator = NAME_SEPARATOR + TOPIC_ADMIN
         idx = channel.find(admin_indicator)
         if idx < 0:
             return False
@@ -85,7 +87,8 @@ class HubCommunicationService:
 
     def process_message(self, channel, message):
         if self.is_admin_channel(channel):
-            self.process_admin_messsage(channel, message)
+            self.process_admin_message(channel, message)
+            return
 
         point_id = self.get_point_id(channel)
         if point_id is None:
@@ -95,5 +98,7 @@ class HubCommunicationService:
             self.rooms_service.updateStatus(point_id=point_id, message=message)
             
     def process_admin_message(self, channel, message):
+        logging.info("Admin message received: channel {0} message {1}"
+                .format(channel, message))
         if message == COMMAND_RESET:
             self.rooms_service.reset()
