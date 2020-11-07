@@ -5,9 +5,9 @@
 As root user execute following commands:
 
 ```
-apt-get update
-apt-get install mosquitto
-apt-get install mosquitto-clients
+sudo apt-get update
+sudo apt-get install mosquitto
+sudo apt-get install mosquitto-clients
 ```
 Source: https://www.instructables.com/id/Installing-MQTT-BrokerMosquitto-on-Raspberry-Pi/
 
@@ -47,6 +47,7 @@ Source: https://www.openhab.org/docs/installation/linux.html
 1. For Add-ons -> Bindins install following bindings:
     1. MQTT Binding
     1. NTP Binding
+    1. TP-Link Smart Home Binding
 1. For Add-ons -> Misc install for following
     1. HomeKit Integration
 1. For Configuration -> Services -> IO -> HomeKit Integration apply configuration
@@ -79,7 +80,7 @@ Source: https://www.openhab.org/docs/installation/linux.html
    ```
 1. Install service and set to be automaticaly started after machine boots
     ```
-    cd PROJECT_DIR/linux-service
+    cd ~/PkamSmartHome/linux-service
     sudo ./install-service.sh
     ```
 1. Service psh-actor is allready started. Status can be checked by 

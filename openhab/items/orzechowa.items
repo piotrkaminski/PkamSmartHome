@@ -2,12 +2,14 @@ Group    Home               "Orzechowa"         <house>
 Group    GF                 "Parter"            <groundfloor>   (Home)              
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfOfficeCeiling"}
+Switch   Office_Lampa       "Lampa"             <light>         (Office, gLight)  ["Lighting"] {channel="tplinksmarthome:hs100:B87101:switch" }
 
 Group    Livingroom         "Salon"             <video>        (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomLedTV"}
 Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomCeiling13"}
 Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfLivingroomCeiling23"}
 Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  ["Lighting"]
+Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight)  ["Lighting"] {channel="tplinksmarthome:hs100:B744EB:switch"}
 
 Group    Diningroom         "Jadalnia"             <presence>        (GF)
 Switch   Diningroom_1_3     "Jadalnia 1/3"         <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling13"}

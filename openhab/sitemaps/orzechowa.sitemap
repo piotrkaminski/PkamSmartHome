@@ -5,6 +5,7 @@ sitemap orzechowa label="Orzechowa" {
 
     Frame label="Gabinet" {
         Switch item=Office_Light
+        Switch item=Office_Lampa
     }
 
 
@@ -13,6 +14,7 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=gLivingroomCeilingLight
         Switch item=Livingroom_1_3
         Switch item=Livingroom_2_3
+        Switch item=Livingroom_Lampa
     }
 
     Frame label="Jadalnia" {
