@@ -45,6 +45,7 @@ Source: https://www.openhab.org/docs/installation/linux.html
 1. Open OpenHab web console and choose Standard Configuration.
 1. Open OpenHab and click Paper UI console
 1. For Add-ons -> Bindins install following bindings:
+    1. Astro Binding
     1. MQTT Binding
     1. NTP Binding
     1. TP-Link Smart Home Binding

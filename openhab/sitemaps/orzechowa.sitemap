@@ -1,6 +1,8 @@
 sitemap orzechowa label="Orzechowa" {
     Frame label="Date" {
         Text item=Date
+        Text item=Sunrise_Time
+        Text item=Sunset_Time
     }
 
     Frame label="Gabinet" {

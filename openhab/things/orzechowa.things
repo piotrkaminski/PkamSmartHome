@@ -1,4 +1,5 @@
 ntp:ntp:currentTime  [ hostname="nl.pool.ntp.org", refreshInterval=60, refreshNtp=30 ]
+astro:sun:home       [ geolocation="51.029277, 17.114613,121"]
 
 Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {
   Thing mqtt:topic:pshActor1 {

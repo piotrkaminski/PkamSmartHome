@@ -21,4 +21,6 @@ Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)
 
 Group:Switch:AND(ON, OFF)   gLight   "Wszystkie światła"     <light>   (Home)   
 
-DateTime Date  "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
+DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
+DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start" }
+DateTime Sunset_Time        "Sunset [%1$tH:%1$tM]"                        <sunset>       {channel="astro:sun:home:set#start" }
