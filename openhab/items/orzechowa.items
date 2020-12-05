@@ -1,4 +1,10 @@
+// Master groups
 Group    Home               "Orzechowa"         <house>                             
+Group:Switch:AND(ON, OFF)   gLight         "Wszystkie światła"  <light>          (Home)
+Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>   (gLight) 
+Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła"  <outdoorlight>   (gLight) 
+
+// Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfOfficeCeiling"}
@@ -16,14 +22,18 @@ Switch   Diningroom_1_3     "Jadalnia 1/3"         <light>         (Diningroom, 
 Switch   Diningroom_2_3     "Jadalnia 2/3"         <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:gfDiningroomCeiling23"}
 Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light>   (Diningroom, gLight)  ["Lighting"]
 
+// First Floor
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
 
 Group    Outdoor            "Outdoor"            <outdoorlight> (Home)
-Switch   Outdoor_Front_Xmas "Front Lampki"        <light>       (Outdoor, gLight, NightLights)  ["Lighting"] {channel="tplinksmarthome:hs110:CCDBAD:switch" }
+Switch   Outdoor_Front_Xmas "Front Lampki"        <light>       (Outdoor, gLight, gXmasLights)  ["Lighting"] {channel="tplinksmarthome:hs110:CCDBAD:switch" }
 
-Group:Switch:AND(ON, OFF)   gLight         "Wszystkie światła"  <light>          (Home)
-Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>   (gLight) 
+Group    Taras              "Taras"              <terrace> (Home)
+Switch   Taras_Xmas         "Taras Lampki"        <light>       (Taras, gLight, gXmasLights)  ["Lighting"]  {channel="tplinksmarthome:hs110:CD0969:switch" }
+Group:Dimmer gTaras_Light    "Taras Kinkiet"  <light>       (Taras, gLight, gNightLights)  ["Lighting"]
+Dimmer   Taras_1             "Taras 1"        <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:0F8C5A:brightness" }
+Dimmer   Taras_2             "Taras 2"        <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:083821:brightness" }
 
 DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
 DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start" }

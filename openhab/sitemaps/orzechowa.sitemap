@@ -36,10 +36,16 @@ sitemap orzechowa label="Orzechowa" {
     }
 
 
+    Frame label="Taras" {
+        Switch item=Taras_Xmas
+        //Dimmer item=gTaras_Light
+    }
+
     Frame label="Dom" {
         Group item=GF
         Group item=FF
         Group item=Outdoor
+        Group item=Taras
         Switch item=gLight
     }
 }

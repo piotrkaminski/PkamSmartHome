@@ -1,8 +1,8 @@
 ntp:ntp:currentTime  [ hostname="nl.pool.ntp.org", refreshInterval=60, refreshNtp=30 ]
-astro:sun:home       [ geolocation="51.029277, 17.114613,121"]
+astro:sun:home       [ geolocation="51.029277, 17.114613, 121"]
 
 Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {
-  Thing mqtt:topic:pshActor1 {
+  Thing topic pshActor1 {
     Channels:
       Type switch : gfOfficeCeiling  [ stateTopic="/Pi1/Out/Office/Ceiling" , commandTopic="/Pi1/In/Office/Ceiling", on="ON", off="OFF"]
       Type switch : gfLivingroomLedTV  [ stateTopic="/Pi1/Out/Livingroom/LedTV" , commandTopic="/Pi1/In/Livingroom/LedTV", on="ON", off="OFF"]

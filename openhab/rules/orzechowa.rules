@@ -1,0 +1,29 @@
+// Switch on lights
+rule "Start night lights on sunset"
+when
+    Channel "astro:sun:home:set#event" triggered
+then
+    switch(receivedEvent.getEvent()) {
+        case "START": {
+            gNightLights.sendCommand(ON)
+        }
+    }
+end
+
+// Switch on Xmas lights
+rule "Switch on Xmas lights"
+when
+    Time cron "0 0 18 ? JAN,DEC *"
+then
+    gXmasLights.sendCommand(ON)
+    gNightLights.sendCommand(OFF)
+end
+
+// Switch off all night lights every day at 23:00
+rule "Off night lights"
+when
+    Time cron "0 0 23 * * ?"
+then
+    gNightLights.sendCommand(OFF)
+    gXmasLights.sendCommand(OFF)
+end
