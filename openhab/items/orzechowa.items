@@ -19,7 +19,11 @@ Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
 
-Group:Switch:AND(ON, OFF)   gLight   "Wszystkie światła"     <light>   (Home)   
+Group    Outdoor            "Outdoor"            <outdoorlight> (Home)
+Switch   Outdoor_Front_Xmas "Front Lampki"        <light>       (Outdoor, gLight, NightLights)  ["Lighting"] {channel="tplinksmarthome:hs110:CCDBAD:switch" }
+
+Group:Switch:AND(ON, OFF)   gLight         "Wszystkie światła"  <light>          (Home)
+Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>   (gLight) 
 
 DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
 DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start" }

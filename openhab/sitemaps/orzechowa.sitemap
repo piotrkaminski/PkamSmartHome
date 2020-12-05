@@ -31,9 +31,15 @@ sitemap orzechowa label="Orzechowa" {
 //       Switch item=gMarysiaCeilingLight
 //   }
 
+    Frame label="Outdoor" {
+        Switch item=Outdoor_Front_Xmas
+    }
+
+
     Frame label="Dom" {
         Group item=GF
         Group item=FF
+        Group item=Outdoor
         Switch item=gLight
     }
 }
