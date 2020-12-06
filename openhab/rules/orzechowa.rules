@@ -1,3 +1,14 @@
+// Notify current state on startup
+rule "Startup"
+when
+    System started
+then
+    logInfo("RuleEngine", "Rule at system startup")
+    val actions = getActions("mqtt","mqtt:broker:pshActor1")
+    actions.publishMQTT("/Pi1/In/Admin","NOTIFY_CURRENT_STATE")    
+end
+
+
 // Switch on lights
 rule "Start night lights on sunset"
 when

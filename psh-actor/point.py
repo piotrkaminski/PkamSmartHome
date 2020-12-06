@@ -13,3 +13,7 @@ class Point:
 
     def reset(self):
         pass
+
+
+    def notifyCurrentState(self):
+        pass

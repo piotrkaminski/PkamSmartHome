@@ -33,3 +33,7 @@ class Room:
                 updated = True
         if not updated:
             logging.warning("No point {} in room {} to update status".format(point_id, self.name))
+
+    def notify_current_state(self):
+        for point in self.points:
+            point.notifyCurrentState()
