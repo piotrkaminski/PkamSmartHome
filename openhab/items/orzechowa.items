@@ -7,32 +7,32 @@ Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła"  <outdoorlig
 // Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              
 Group    Office             "Biuro"             <office>        (GF)                
-Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling"}
-Switch   Office_Lampa       "Lampa"             <light>         (Office, gLight)  ["Lighting"] {channel="tplinksmarthome:hs100:B87101:switch" }
+Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
+Switch   Office_Lampa       "Lampa"             <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
 
 Group    Livingroom         "Salon"             <video>        (GF)
-Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV"}
-Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling13"}
-Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling23"}
-Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  ["Lighting"]
-Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight)  ["Lighting"] {channel="tplinksmarthome:hs100:B744EB:switch"}
+Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}
+Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLivingroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling13", homekit="Lighting"}
+Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling23", homekit="Lighting"}
+Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  {homekit="Lighting"}
+Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight)                   {channel="tplinksmarthome:hs100:B744EB:switch", homekit="Lighting"}
 
 Group    Diningroom         "Jadalnia"          <presence>        (GF)
-Switch   Diningroom_1_3     "Jadalnia 1/3"      <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling13"}
-Switch   Diningroom_2_3     "Jadalnia 2/3"      <light>         (Diningroom, gDiningroomCeilingLight)  ["Lighting"] {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling23"}
-Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light>   (Diningroom, gLight)  ["Lighting"]
+Switch   Diningroom_1_3     "Jadalnia 1/3"      <light>         (Diningroom, gDiningroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling13", homekit="Lighting"}
+Switch   Diningroom_2_3     "Jadalnia 2/3"      <light>         (Diningroom, gDiningroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling23", homekit="Lighting"}
+Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light>   (Diningroom, gLight)  {homekit="Lighting"}
 
 // First Floor
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
 
 Group    Outdoor            "Outdoor"           <outdoorlight> (Home)
-Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, gXmasLights)  ["Lighting"] {channel="tplinksmarthome:hs110:CCDBAD:switch" }
-Dimmer   Outdoor_Front      "Front Kinkiet"           <light>       (Outdoor, gNightLights)                   {channel="tplinksmarthome:kl110:07F10F:brightness" }
+Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, gXmasLights)   {channel="tplinksmarthome:hs110:CCDBAD:switch", homekit="Lighting"}
+Dimmer   Outdoor_Front      "Front Kinkiet"           <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" }
 
 Group    Taras              "Taras"             <terrace>     (Home)
-Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight, gXmasLights)  ["Lighting"]  {channel="tplinksmarthome:hs110:CD0969:switch" }
-Group:Dimmer gTaras_Light    "Taras Kinkiet"    <light>       (Taras, gLight, gNightLights)  ["Lighting"]
+Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight, gXmasLights)     {channel="tplinksmarthome:hs110:CD0969:switch", homekit="Lighting"}
+Group:Dimmer gTaras_Light    "Taras Kinkiet"    <light>       (Taras, gLight)                  {homekit="Lighting, Lighting.Brightness"}
 Dimmer   Taras_1             "Taras 1"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:0F8C5A:brightness" }
 Dimmer   Taras_2             "Taras 2"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:083821:brightness" }
 

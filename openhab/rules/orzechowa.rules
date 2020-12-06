@@ -13,7 +13,7 @@ end
 // Switch on Xmas lights
 rule "Switch on Xmas lights"
 when
-    Time cron "0 0 18 ? JAN,DEC *"
+    Time cron "0 0 17 ? JAN,DEC *"
 then
     gXmasLights.sendCommand(ON)
     gNightLights.sendCommand(OFF)
