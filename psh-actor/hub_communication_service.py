@@ -7,15 +7,15 @@ from constants import TOPIC_IN
 from constants import TOPIC_OUT
 from constants import TOPIC_ADMIN
 from constants import COMMAND_RESET
+from constants import COMMAND_NOTIFY_CURRENT_STATE
 from paho.mqtt.client import Client
 from signal import pause
 import logging
 
-
 class HubCommunicationService:
 
     def __init__(self):
-        self.client = None
+        self.client = None        
         self.client_name = None
         self.rooms_service = None
 
@@ -102,3 +102,5 @@ class HubCommunicationService:
                 .format(channel, message))
         if message == COMMAND_RESET:
             self.rooms_service.reset()
+        if message == COMMAND_NOTIFY_CURRENT_STATE:
+            self.rooms_service.notify_current_state()

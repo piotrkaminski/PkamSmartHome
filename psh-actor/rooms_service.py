@@ -41,3 +41,7 @@ class RoomsService:
     def reset(self):
         for room in self.rooms:
             room.reset()
+
+    def notify_current_state(self):
+        for room in self.rooms:
+            room.notify_current_state()
