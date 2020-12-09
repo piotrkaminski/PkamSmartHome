@@ -21,6 +21,14 @@ then
     }
 end
 
+// Switch on night lights early morning
+rule "Switch on night lights early morning"
+when
+    Time cron "0 30 6 * * ?"
+then
+    gNightLights.sendCommand(OFF)
+end
+
 // Switch on Xmas lights
 rule "Switch on Xmas lights"
 when
@@ -37,4 +45,16 @@ when
 then
     gNightLights.sendCommand(OFF)
     gXmasLights.sendCommand(OFF)
+end
+
+// Switch off lights
+rule "Switch off night lights on sunrise"
+when
+    Channel "astro:sun:home:rise#event" triggered
+then
+    switch(receivedEvent.getEvent()) {
+        case "START": {
+            gNightLights.sendCommand(OFF)
+        }
+    }
 end
