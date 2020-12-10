@@ -26,7 +26,7 @@ rule "Switch on night lights early morning"
 when
     Time cron "0 30 6 * * ?"
 then
-    gNightLights.sendCommand(OFF)
+    gNightLights.sendCommand(ON)
 end
 
 // Switch on Xmas lights
