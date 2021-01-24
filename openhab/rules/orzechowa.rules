@@ -26,13 +26,16 @@ rule "Switch on night lights early morning"
 when
     Time cron "0 30 6 * * ?"
 then
-    gNightLights.sendCommand(ON)
+    if (Sun_Elevation.state < 0) {
+        gNightLights.sendCommand(ON)
+    }    
 end
 
 // Switch on Xmas lights
 rule "Switch on Xmas lights"
 when
-    Time cron "0 0 17 ? JAN,DEC *"
+    Time cron "0 0 17 6-31 DEC ? *" or
+    Time cron "0 0 17 ? JAN *"
 then
     gXmasLights.sendCommand(ON)
     gNightLights.sendCommand(OFF)
