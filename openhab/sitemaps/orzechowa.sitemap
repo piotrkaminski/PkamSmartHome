@@ -3,6 +3,7 @@ sitemap orzechowa label="Orzechowa" {
         Text item=Date
         Text item=Sunrise_Time
         Text item=Sunset_Time
+        Text item=Sun_Elevation
     }
 
     Frame label="Gabinet" {

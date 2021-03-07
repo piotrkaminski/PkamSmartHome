@@ -26,9 +26,13 @@ rule "Switch on night lights early morning"
 when
     Time cron "0 30 6 * * ?"
 then
-    if (Sun_Elevation.state < 0) {
+    if (Sun_Elevation.state < 0|°) {
+        logInfo("Astro", "Sun is still down, elevation {}, lights to be enabled", Sun_Elevation.state)
         gNightLights.sendCommand(ON)
-    }    
+    } else {
+        logInfo("Astro", "Sun is up, elevation {}, no need to enable lights", Sun_Elevation.state)
+        gNightLights.sendCommand(OFF)
+    }
 end
 
 // Switch on Xmas lights
@@ -57,6 +61,7 @@ when
 then
     switch(receivedEvent.getEvent()) {
         case "START": {
+            logInfo("Astro", "Sun rise occured, elevation {}, lights to be disables", Sun_Elevation.state)
             gNightLights.sendCommand(OFF)
         }
     }
