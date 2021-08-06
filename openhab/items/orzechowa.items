@@ -28,7 +28,7 @@ Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)
 
 Group    Outdoor            "Outdoor"           <outdoorlight> (Home)
 Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, gXmasLights)   {channel="tplinksmarthome:hs110:CCDBAD:switch", homekit="Lighting"}
-Dimmer   Outdoor_Front      "Front Kinkiet"           <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" }
+Dimmer   Outdoor_Front      "Front Kinkiet"           <light>       (Outdoor)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" }
 
 Group    Taras              "Taras"             <terrace>     (Home)
 Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight, gXmasLights)     {channel="tplinksmarthome:hs110:CD0969:switch", homekit="Lighting"}
