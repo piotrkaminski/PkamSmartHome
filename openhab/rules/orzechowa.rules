@@ -14,7 +14,7 @@ rule "Start night lights on sunset"
 when
     Channel "astro:sun:home:set#event" triggered
 then
-    switch(receivedEvent.getEvent()) {
+    switch(receivedEvent) {
         case "START": {
             gNightLights.sendCommand(ON)
         }
@@ -59,7 +59,7 @@ rule "Switch off night lights on sunrise"
 when
     Channel "astro:sun:home:rise#event" triggered
 then
-    switch(receivedEvent.getEvent()) {
+    switch(receivedEvent) {
         case "START": {
             logInfo("Astro", "Sun rise occured, elevation {}, lights to be disables", Sun_Elevation.state)
             gNightLights.sendCommand(OFF)

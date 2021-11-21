@@ -1,5 +1,5 @@
 #!/bin/bash
-OPENHAB_DIR=/etc/openhab2
+OPENHAB_DIR=/etc/openhab
 
 BACKUP_DIR=./backup
 BACKUP_ITEMS_DIR=$BACKUP_DIR/items
