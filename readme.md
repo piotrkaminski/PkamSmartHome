@@ -1,58 +1,25 @@
 # Installation
 
-## Mosquito installation:
+## Install openHabian with OpenHab
 
-As root user execute following commands:
+1. Install latest stable version of openHABian on SD card using instruction https://www.openhab.org/docs/installation/openhabian.html. 
+    1. First boot requires to be connect to internet via cable (preferably) and can take a first long coffee (15 - 45 min). 
+    1. You can watch progress on http://your-ip/ page. 
+    1. Initial login and passwords to operating system are openhabian/openhabian
+1. Login to operating system shell and using openhabian-config (sudo openhabian-config) set following configuration
+    1. Set you host name (menu 30 -> 31)
+    1. Disable wifi (menu 30 -> 37)
+    1. Install Mosquitto (menu 20 -> 23)
+1. When installation is done, open openHAB console on page http://your-ip:8080
+    1. create admin account
+    1. point location or you home
+    1. install following Addons: 
+       1. Astro Binding, 
+       1.  HomeKit Integration, 
+       1.  MQTT Binding, 
+       1.  NTP Binding, 
+       1. TP-Link Smart Home Binding
 
-```
-sudo apt-get update
-sudo apt-get install mosquitto
-sudo apt-get install mosquitto-clients
-```
-Source: https://www.instructables.com/id/Installing-MQTT-BrokerMosquitto-on-Raspberry-Pi/
-
-## OpenHab installation
-
-As root user execute following commands:
-
-```
-sudo apt update
-sudo apt install openjdk-8-jdk
-
-sudo apt-get install screen mc vim git htop
-
-wget -qO - 'https://bintray.com/user/downloadSubjectPublicKey?username=openhab' | sudo apt-key add -
-sudo apt-get install apt-transport-https
-
-echo 'deb https://dl.bintray.com/openhab/apt-repo2 stable main' | sudo tee /etc/apt/sources.list.d/openhab2.list
-sudo apt-get update
-sudo apt-get install openhab2
-sudo apt-get install openhab2-addons
-
-sudo systemctl start openhab2.service
-sudo systemctl status openhab2.service
-
-sudo systemctl daemon-reload
-sudo systemctl enable openhab2.service
-
-```
-OpenHab is up and running on http://localhost:8080. Fist start takes few minutes (literally), take a break for coffee.
-
-Source: https://www.openhab.org/docs/installation/linux.html
-
-## OpenHab configuration
-
-1. Open OpenHab web console and choose Standard Configuration.
-1. Open OpenHab and click Paper UI console
-1. For Add-ons -> Bindins install following bindings:
-    1. Astro Binding
-    1. MQTT Binding
-    1. NTP Binding
-    1. TP-Link Smart Home Binding
-1. For Add-ons -> Misc install for following
-    1. HomeKit Integration
-1. For Configuration -> Services -> IO -> HomeKit Integration apply configuration
-    1. Network Interface -> WiFi Ip address
 
 ## Install required dependecies
 
@@ -89,11 +56,12 @@ Source: https://www.openhab.org/docs/installation/linux.html
     sudo systemctl status psh-actor
     ```
 
-## Additional installation component
-
-1. It is usefull to enable SSL interface on Raspberry
-    1. Raspberry Start -> Preferences -> Raspberry Pi Configuration -> Interfaces -> SSH enabled
-
+## Add autodiscovered Things
+1. Login into admin console http://your-ip:8080
+1. Go to Settings -> Inbox 
+1. Each autodiscovered Thing should be added by
+    1. Click on Thing name
+    2. Click 'Add as Thing' 
 
 # Executabes Update
 
