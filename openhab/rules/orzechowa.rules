@@ -39,16 +39,18 @@ end
 rule "Switch on Xmas lights"
 when
     Time cron "0 0 17 6-31 DEC ? *" or
-    Time cron "0 0 17 ? JAN *"
+    Time cron "0 0 17 1-15 JAN *" or
+    Time cron "0 0 6 6-31 DEC ? *" or
+    Time cron "0 0 6 1-15 JAN *" 
 then
     gXmasLights.sendCommand(ON)
     gNightLights.sendCommand(OFF)
 end
 
-// Switch off all night lights every day at 23:00
+// Switch off all night lights every day at 0:00
 rule "Off night lights"
 when
-    Time cron "0 0 23 * * ?"
+    Time cron "0 0 0 * * ?"
 then
     gNightLights.sendCommand(OFF)
     gXmasLights.sendCommand(OFF)
@@ -63,6 +65,7 @@ then
         case "START": {
             logInfo("Astro", "Sun rise occured, elevation {}, lights to be disables", Sun_Elevation.state)
             gNightLights.sendCommand(OFF)
+            gXmasLights.sendCommand(OFF)
         }
     }
 end
