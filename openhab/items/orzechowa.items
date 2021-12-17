@@ -9,7 +9,7 @@ Group    GF                 "Parter"            <groundfloor>   (Home)
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
 Switch   Office_Lampa       "Lampa"             <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
-Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness"}
+Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 
 Group    Livingroom         "Salon"             <video>        (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}
@@ -29,13 +29,13 @@ Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)
 
 Group    Outdoor            "Outdoor"           <outdoorlight> (Home)
 Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, gXmasLights)   {channel="tplinksmarthome:hs110:CCDBAD:switch", homekit="Lighting"}
-Dimmer   Outdoor_Front      "Front Kinkiet"     <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" }
+Dimmer   Outdoor_Front      "Front Kinkiet"     <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 
 Group    Taras              "Taras"             <terrace>     (Home)
 Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight, gXmasLights)     {channel="tplinksmarthome:hs110:CD0969:switch", homekit="Lighting"}
 Group:Dimmer gTaras_Light    "Taras Kinkiet"    <light>       (Taras, gLight)                  {homekit="Lighting, Lighting.Brightness"}
-Dimmer   Taras_1             "Taras 1"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:0F8C5A:brightness", homekit="Lighting, Lighting.Brightness"}
-Dimmer   Taras_2             "Taras 2"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:083821:brightness", homekit="Lighting, Lighting.Brightness"}
+Dimmer   Taras_1             "Taras 1"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:0F8C5A:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
+Dimmer   Taras_2             "Taras 2"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:083821:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 
 DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calendar>     {channel="ntp:ntp:currentTime:dateTime"}
 DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start"}
