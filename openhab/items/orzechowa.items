@@ -8,7 +8,6 @@ Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła"  <outdoorlig
 Group    GF                 "Parter"            <groundfloor>   (Home)              
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
-Switch   Office_Lampa       "Lampa"             <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 
 Group    Livingroom         "Salon"             <video>        (GF)
@@ -17,6 +16,7 @@ Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLi
 Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling23", homekit="Lighting"}
 Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  {homekit="Lighting"}
 Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight)                   {channel="tplinksmarthome:hs100:B744EB:switch", homekit="Lighting"}
+Switch   Livingroom_XmasTree "Choinka"          <light>         (Livingroom, gLight, gXmasLights)      {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
 
 Group    Diningroom         "Jadalnia"          <presence>        (GF)
 Switch   Diningroom_1_3     "Jadalnia 1/3"      <light>         (Diningroom, gDiningroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling13", homekit="Lighting"}
