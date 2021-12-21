@@ -17,6 +17,9 @@ then
     switch(receivedEvent) {
         case "START": {
             gNightLights.sendCommand(ON)
+            if (Away.state == ON) {
+            	gAwayLights.sendCommand(ON)
+            }
         }
     }
 end
@@ -50,10 +53,11 @@ end
 // Switch off all night lights every day at 0:00
 rule "Off night lights"
 when
-    Time cron "0 0 0 * * ?"
+    Time cron "0 0 23 * * ?"
 then
     gNightLights.sendCommand(OFF)
     gXmasLights.sendCommand(OFF)
+    gAwayLights.sendCommand(OFF)
 end
 
 // Switch off lights

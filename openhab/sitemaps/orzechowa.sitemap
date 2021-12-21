@@ -49,5 +49,6 @@ sitemap orzechowa label="Orzechowa" {
         Group item=Outdoor
         Group item=Taras
         Switch item=gLight
+        Switch item=Away
     }
 }
