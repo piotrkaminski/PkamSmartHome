@@ -10,6 +10,7 @@
     1. Set you host name (menu 30 -> 31)
     1. Disable wifi (menu 30 -> 37)
     1. Install Mosquitto (menu 20 -> 23)
+    1. Enable NTP time synchronization
 1. When installation is done, open openHAB console on page http://your-ip:8080
     1. create admin account
     1. point location or you home
@@ -40,7 +41,7 @@
     ```
     cd ~/PkamSmartHome/openhab
     sudo ./install-config.sh
-    ```
+    ```	
 1. Create log directory
    ```
    cd ~/PkamSmartHome/psh-actor 
@@ -72,7 +73,7 @@
    cd ~/PkamSmartHome 
    git pull
    sudo systemctl restart psh-actor
-   ```
+   ```	
 
 # Reset installation (put all points into standard mode)
 
