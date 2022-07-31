@@ -5,11 +5,11 @@ After=network-online.target mosquitto.service
 [Service]
 Type=simple
 NotifyAccess=main
-ExecStart=/home/openhabian/PkamSmartHome/psh-actor/start.sh
+ExecStart=/home/pshactor/PkamSmartHome/psh-actor/start.sh
 # Restart=always
 # RestartSec=1
-User=openhabian
-WorkingDirectory=/home/openhabian/PkamSmartHome/psh-actor/
+User=pshactor
+WorkingDirectory=/home/pshactor/PkamSmartHome/psh-actor/
 
 
 [Install]
