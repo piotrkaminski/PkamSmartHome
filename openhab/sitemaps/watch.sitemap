@@ -1,0 +1,7 @@
+sitemap watch label="Watch" {
+  Switch item=Office_Light
+  Switch item=Office_Biurko
+  Switch item=Livingroom_LedTV
+  Switch item=Livingroom_Lampa
+  Switch item=gLivingroomCeilingLight
+}
