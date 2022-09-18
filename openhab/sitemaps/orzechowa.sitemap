@@ -9,6 +9,7 @@ sitemap orzechowa label="Orzechowa" {
     Frame label="Gabinet" {
         Switch item=Office_Light
         Slider item=Office_Biurko
+        Switch item=Office_Biurko
     }
 
 
@@ -27,20 +28,14 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Diningroom_2_3
     }
 
-//   Frame label="Marysia" {
-//       Switch item=Marysia_Light_1_3
-//       Switch item=Marysia_Light_2_3
-//       Switch item=gMarysiaCeilingLight
-//   }
-
     Frame label="Outdoor" {
         Switch item=Outdoor_Front_Xmas
     }
 
-
     Frame label="Taras" {
         Switch item=Taras_Xmas
         Slider item=gTaras_Light
+        Switch item=gTaras_Light
     }
 
     Frame label="Dom" {
