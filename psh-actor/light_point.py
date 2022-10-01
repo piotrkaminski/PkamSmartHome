@@ -56,4 +56,4 @@ class LightPoint(Point):
             self.disable()
         else:
             self.enable()
-        self.notifyCurrentState()
+        self.notifyCurrentState() 

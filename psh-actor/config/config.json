@@ -16,6 +16,11 @@
                     "Type": "Light",
                     "GpioControlPin": 2,
                     "GpioButtonPin": 3
+                },{
+                    "Name": "RollerShutter",
+                    "Type": "Blind",
+                    "GpioControlPin": 23,
+                    "GpioButtonPin": 24
                 }
             ]
         },{

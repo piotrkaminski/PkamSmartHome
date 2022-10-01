@@ -10,6 +10,7 @@ Group    GF                 "Parter"            <groundfloor>   (Home)
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
+Rollershutter Office_Blinds "Roleta"            <rollershutter> (Office)                       {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeRollerShutter", homekit="WindowCovering"}
 
 Group    Livingroom         "Salon"             <video>         (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}

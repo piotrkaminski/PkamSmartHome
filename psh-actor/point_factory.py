@@ -1,10 +1,12 @@
 from constants import CONFIG_POINT_NAME
 from constants import CONFIG_POINT_TYPE
 from constants import CONFIG_POINT_TYPE_LIGHT
+from constants import CONFIG_POINT_TYPE_BLIND
 from constants import CONFIG_POINT_CONTROLPIN
 from constants import CONFIG_POINT_BUTTONPIN
 from constants import NAME_SEPARATOR
 from light_point import LightPoint
+from blind_point import BlindPoint
 
 class PointFactory:
 
@@ -32,6 +34,13 @@ class PointFactory:
             point = LightPoint(id=point_id,
                 controlPin=ctlPin,
                 buttonPin=btnPin,
+                comm_service=comm_service)
+            point.initialize()
+            return point
+        elif point_type == CONFIG_POINT_TYPE_BLIND:
+            point = BlindPoint(id=point_id,
+                controlUpPin=ctlPin,
+                controlDownPin=btnPin,
                 comm_service=comm_service)
             point.initialize()
             return point
