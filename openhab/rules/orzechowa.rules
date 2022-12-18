@@ -16,7 +16,7 @@ when
 then
     switch(receivedEvent) {
         case "START": {
-            gNightLights.sendCommand(ON)
+//            gNightLights.sendCommand(ON)
             if (Away.state == ON) {
             	gAwayLights.sendCommand(ON)
             }
@@ -24,33 +24,17 @@ then
     }
 end
 
-// Switch on night lights early morning
-rule "Switch on night lights early morning"
-when
-    Time cron "0 30 6 * * ?"
-then
-    if (Sun_Elevation.state < 0|°) {
-        logInfo("Astro", "Sun is still down, elevation {}, lights to be enabled", Sun_Elevation.state)
-        gNightLights.sendCommand(ON)
-    } else {
-        logInfo("Astro", "Sun is up, elevation {}, no need to enable lights", Sun_Elevation.state)
-        gNightLights.sendCommand(OFF)
-    }
-end
-
 // Switch on Xmas lights
 rule "Switch on Xmas lights"
 when
     Time cron "0 0 16 6-31 DEC ? *" or
-    Time cron "0 15 16 1-15 JAN *" or
-    Time cron "0 0 6 6-31 DEC ? *" or
-    Time cron "0 0 6 1-15 JAN *" 
+    Time cron "0 15 16 1-15 JAN *"
 then
-    gXmasLights.sendCommand(ON)
     gNightLights.sendCommand(OFF)
+    gXmasLights.sendCommand(ON)
 end
 
-// Switch off all night lights every day at 0:00
+// Switch off all night lights every day at 23:00
 rule "Off night lights"
 when
     Time cron "0 0 23 * * ?"

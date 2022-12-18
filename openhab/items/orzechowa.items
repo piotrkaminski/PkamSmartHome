@@ -33,7 +33,7 @@ Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, 
 Dimmer   Outdoor_Front      "Front Kinkiet"     <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:07F10F:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 
 Group    Taras              "Taras"             <terrace>     (Home)
-Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight, gXmasLights)     {channel="tplinksmarthome:hs110:CD0969:switch", homekit="Lighting"}
+Switch   Taras_Xmas         "Taras Lampki"      <light>       (Taras, gLight)                  {channel="tplinksmarthome:hs110:CD0969:switch", homekit="Lighting"}
 Group:Dimmer gTaras_Light    "Taras Kinkiet"    <light>       (Taras, gLight)                  {homekit="Lighting, Lighting.Brightness"}
 Dimmer   Taras_1             "Taras 1"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:0F8C5A:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 Dimmer   Taras_2             "Taras 2"          <light>       (gTaras_Light)                   {channel="tplinksmarthome:kl110:083821:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
