@@ -4,34 +4,34 @@
 
 1. Install latest stable version of openHABian on SD card using instruction https://www.openhab.org/docs/installation/openhabian.html
     1. First boot requires to be connect to internet via cable (preferably) and can take a first long coffee break (~1 hour 15 minutes)
-    1. If there will be keyboard and display attached, you will be asked for user name to create account - please use `pshactor` This account will be used for PkamSmartHome actor service. This user also is sudoer, used for operation system configuration.
-    1. You can watch progress on http://your-ip/ page.
-    1. Initial login and passwords to operating system are openhabian/openhabian
-1. Login to operating system shell as `pshactor` created above, using `sudo openhabian-config` set following configuration
+    1. You can watch progress on http://your-ip:81/ page.
+    1. Initial login and passwords to operating system are `openhabian/openhabian`
+1. Login to operating system shell as `openhabian`. Execute `sudo openhabian-config` to set following configuration:
     1. Set you host name (menu 30 -> 31)
-    1. Disable wifi (menu 30 -> 37)
-    1. Install Mosquitto (menu 20 -> 23), use blank password for unencrypted communication
-    1. Enable NTP time synchronisation (menu 30 -> Enable NTP)
+    1. Install Mosquitto (menu 20 -> 23), use blank password for unencrypted communication despite of insisting for prividing password.
+1. Change password for `openhubian` 
+    1. Type in terminal `passwd`. provide current password `openhabian` and change to different one.
 1. Open openHAB console on page http://your-ip:8080
-    1. create admin account
-    1. point location or you home
-    1. install following Add-ons:
-       1. Astro Binding,
-       1.  HomeKit Integration,
-       1.  MQTT Binding,
-       1.  NTP Binding,
-       1. TP-Link Smart Home Binding
+    1. Create admin account
+    1. Begin setup
+    1. Point location or you home
+    1. Skip proposed storage Add-ons
+    1. Skip install discovered Add-ons, it is safer to install them manually in later phase, one by one.
+    1. Install following Add-ons
+        1. Astro Binding
+        1. MQTT Binding
+        1. NTP Binding
+        1. HomeKit Integration
+        1. TP-Link Smart Home Binding
+1. Back to terminal and create `pshactor` user. This account will be used for PkamSmartHome actor service.
+    1. Execute `sudo adduser pshactor`
+    1. Provide additional details if would like to.
+    1. Execute `sudo usermod -aG sudo pshactor`
 1. Reboot system `sudo reboot`
-
-## Install required dependencies
-
-1. Install Python Pyho
-    ```
-    pip3 install paho-mqtt
-    ```
 
 ## PkamSmartHome Actor installation
 
+1. Login to terminal as `pshactor`
 1. Download project
     1. Add ssh key to GitHab
     1. Download project from git
@@ -43,10 +43,10 @@
     cd ~/PkamSmartHome/openhab
     sudo ./install-config.sh
     ```
-1. Create log directory
+1. Initialize PSH Actor environment
    ```
    cd ~/PkamSmartHome/psh-actor
-   mkdir logs
+   ./ init.sh
    ```
 1. Install service and set to be automatically started after machine boots
     ```
@@ -69,6 +69,8 @@
 
 ## PkamSmartHome Actor update
 
+This step is needed when configuration of system is updated via GitHub. Initial installation does not require this step.
+
 1. Update code
    ```
    cd ~/PkamSmartHome
@@ -76,7 +78,9 @@
    sudo systemctl restart psh-actor
    ```
 
-# Reset installation (put all points into standard mode)
+# Reset installation 
+
+This step puts all points into standard (initial) mode. Initial installation does not require this step.
 
 ## Reset all points in PkamSmartHome Actor
    ```
