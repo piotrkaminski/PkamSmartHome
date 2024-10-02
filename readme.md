@@ -27,6 +27,8 @@
     1. Execute `sudo adduser pshactor`
     1. Provide additional details if would like to.
     1. Execute `sudo usermod -aG sudo pshactor`
+    1. Exectue `sudo usermod -a -G gpio pshactor`
+    1. Exectue `sudo chown root.gpio /dev/mem && sudo chmod g+rw /dev/mem`
 1. Reboot system `sudo reboot`
 
 ## PkamSmartHome Actor installation
@@ -38,16 +40,23 @@
    ```
    git clone git@github.com:piotrkaminski/PkamSmartHome.git
    ```
+1. Initialize PSH Actor environment
+   ```
+   cd ~/PkamSmartHome/psh-actor
+   pip3 install paho-mqtt --break-system-packages
+   pip3 install gpiozero --break-system-packages
+   mkdir logs
+
+   python3 -m venv env
+   source env/bin/activate
+   pip3 install -r requirements.txt
+   deactivate
+   ```
 1. Update OpenHab configuration
     ```
     cd ~/PkamSmartHome/openhab
     sudo ./install-config.sh
     ```
-1. Initialize PSH Actor environment
-   ```
-   cd ~/PkamSmartHome/psh-actor
-   ./ init.sh
-   ```
 1. Install service and set to be automatically started after machine boots
     ```
     cd ~/PkamSmartHome/linux-service
