@@ -27,6 +27,8 @@
     1. Execute `sudo adduser pshactor`
     1. Provide additional details if would like to.
     1. Execute `sudo usermod -aG sudo pshactor`
+    1. Exectue `sudo usermod -a -G gpio pshactor`
+    1. Exectue `sudo chown root.gpio /dev/mem && sudo chmod g+rw /dev/mem`
 1. Reboot system `sudo reboot`
 
 ## PkamSmartHome Actor installation
@@ -38,16 +40,16 @@
    ```
    git clone git@github.com:piotrkaminski/PkamSmartHome.git
    ```
+1. Initialize PSH Actor environment
+   ```
+   cd ~/PkamSmartHome/psh-actor
+   ./install-environment.sh
+   ```
 1. Update OpenHab configuration
     ```
     cd ~/PkamSmartHome/openhab
     sudo ./install-config.sh
     ```
-1. Initialize PSH Actor environment
-   ```
-   cd ~/PkamSmartHome/psh-actor
-   ./ init.sh
-   ```
 1. Install service and set to be automatically started after machine boots
     ```
     cd ~/PkamSmartHome/linux-service
@@ -60,7 +62,7 @@
 
 ## Add auto-discovered Things
 1. Login into admin console http://your-ip:8080
-1. Go to Settings -> Inbox
+1. Go to Settings -> Things -> Inbox
 1. Each auto discovered Thing should be added by
     1. Click on Thing name
     2. Click 'Add as Thing'
