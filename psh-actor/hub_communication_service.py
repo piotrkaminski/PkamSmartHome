@@ -8,9 +8,9 @@ from constants import TOPIC_OUT
 from constants import TOPIC_ADMIN
 from constants import COMMAND_RESET
 from constants import COMMAND_NOTIFY_CURRENT_STATE
-from paho.mqtt.client import Client
 from signal import pause
 import logging
+import paho.mqtt.client as mqtt
 
 class HubCommunicationService:
 
@@ -23,7 +23,7 @@ class HubCommunicationService:
         self.rooms_service = rooms_service
         comm_config = configuration.get(CONFIG_CONNECTIVITY)
         self.client_name = comm_config.get(CONFIG_CONNECTIVITY_CLIENTNAME)
-        self.client = Client(self.client_name)
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, self.client_name)
         host = comm_config.get(CONFIG_CONNECTIVITY_MQTTIP)
         port = comm_config.get(CONFIG_CONNECTIVITY_MQTTPORT)
         self.client.enable_logger()
@@ -74,7 +74,7 @@ class HubCommunicationService:
         logging.debug("Msg rcv: {0} msg: {1}".format(topic, payload))
         self.process_message(channel=topic, message=payload)
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, reason_code, properties ):
         logging.info("Connected to mqtt service on {0}:{1} ".format(client._host, client._port))
         topic = self.create_topic_name()
         logging.info("Subscribing to topic {}".format(topic))
