@@ -43,14 +43,7 @@
 1. Initialize PSH Actor environment
    ```
    cd ~/PkamSmartHome/psh-actor
-   pip3 install paho-mqtt --break-system-packages
-   pip3 install gpiozero --break-system-packages
-   mkdir logs
-
-   python3 -m venv env
-   source env/bin/activate
-   pip3 install -r requirements.txt
-   deactivate
+   ./install-environment.sh
    ```
 1. Update OpenHab configuration
     ```
@@ -69,7 +62,7 @@
 
 ## Add auto-discovered Things
 1. Login into admin console http://your-ip:8080
-1. Go to Settings -> Inbox
+1. Go to Settings -> Things -> Inbox
 1. Each auto discovered Thing should be added by
     1. Click on Thing name
     2. Click 'Add as Thing'
