@@ -30,6 +30,7 @@ sitemap orzechowa label="Orzechowa" {
 
     Frame label="Outdoor" {
         Switch item=Outdoor_Front_Xmas
+        Switch item=Outdoor_Front
     }
 
     Frame label="Taras" {

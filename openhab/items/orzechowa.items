@@ -3,7 +3,7 @@ Group    Home               "Orzechowa"         <house>
 Group:Switch:AND(ON, OFF)   gLight         "Wszystkie światła"  <light>          (Home)
 Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>   (gLight) 
 Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła" <outdoorlight>   (gLight) 
-Group:Switch:AND(ON, OFF)   gAwayLights    "Tryb nieobecnosc"   <light>          (gLight) 
+Group:Switch:AND(ON, OFF)   gAwayLights    "Tryb nieobecność"   <light>          (gLight) 
 
 // Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              

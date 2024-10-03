@@ -16,7 +16,7 @@ when
 then
     switch(receivedEvent) {
         case "START": {
-//            gNightLights.sendCommand(ON)
+            gNightLights.sendCommand(ON)
             if (Away.state == ON) {
             	gAwayLights.sendCommand(ON)
             }
