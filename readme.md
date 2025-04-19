@@ -23,6 +23,7 @@
         1. NTP Binding
         1. HomeKit Integration
         1. TP-Link Smart Home Binding
+        1. Basic UI
 1. Back to terminal and create `pshactor` user. This account will be used for PkamSmartHome actor service.
     1. Execute `sudo adduser pshactor`
     1. Provide additional details if would like to.
