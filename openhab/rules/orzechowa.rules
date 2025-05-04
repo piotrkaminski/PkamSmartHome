@@ -12,15 +12,21 @@ end
 // Switch on lights
 rule "Start night lights on sunset"
 when
-    Channel "astro:sun:home:set#start" triggered
+    Channel "astro:sun:home:set#event" triggered
 then
-    logInfo("Sunset Rule", "Sunset occurred, scheduling night lights ON in 30 minutes")
-    createTimer(now.plusMinutes(30), [ |
-            gNightLights.sendCommand(ON)
-            if (Away.state == ON) {
-            	gAwayLights.sendCommand(ON)
-            }
-    ])
+    logInfo("Sunset Rule", "Sunset occurred, scheduling night lights ON in 30 minutes. Current Away state: {}", gNightLights.state)
+    switch(receivedEvent) {
+        case "START": {
+            createTimer(now.plusMinutes(30), [ |
+                logInfo("Sunset Rule", "Turning on night lights")
+                gNightLights.sendCommand(ON)
+                if (Away.state == ON) {
+                    logInfo("Sunset Rule", "Away mode active, turning on away lights")
+                    gAwayLights.sendCommand(ON)
+                }
+            ])
+        }
+    }
 end
 
 // Switch on Xmas lights
