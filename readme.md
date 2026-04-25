@@ -68,11 +68,11 @@
     1. Click on Thing name
     2. Click 'Add as Thing'
 
-# Executables Update
+# Configuration or Executables Update
 
 ## PkamSmartHome Actor update
 
-This step is needed when configuration of system is updated via GitHub. Initial installation does not require this step.
+This step is needed when configuration or executables (python code) for switches is updated via GitHub. Initial installation does not require this step.
 
 1. Update code
    ```
@@ -85,8 +85,20 @@ This step is needed when configuration of system is updated via GitHub. Initial 
 
 This step puts all points into standard (initial) mode. Initial installation does not require this step.
 
-## Reset all points in PkamSmartHome Actor
+# Reset all points in PkamSmartHome Actor
    ```
    cd ~/PkamSmartHome/psh-actor
    ./reset-all-points.sh
+   ```
+
+## OpenHub configuration update
+
+This step is needed when items, thing or configuration files are updated or added to PkamSmartHome project, but specifically openhab configuration files, not psh-actor project python code. Initial installation does not require this step.
+
+1. Update configurations
+   ```
+   cd ~/PkamSmartHome
+   git pull
+   cd ~/PkamSmartHome/openhab
+   sudo ./install-config.sh
    ```
