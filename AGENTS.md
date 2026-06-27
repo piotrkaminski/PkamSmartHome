@@ -3,7 +3,7 @@
 ## Project Overview
 
 PkamSmartHome is a Raspberry Pi-based home automation system that controls lights
-and switches via GPIO pins. It communicates with OpenHAB (the central home
+and window blinds via GPIO pins. It communicates with OpenHAB (the central home
 automation hub) through MQTT. The house name is **Orzechowa**.
 
 ## Architecture
@@ -53,7 +53,8 @@ The system has three components:
 The actor reads `psh-actor/config/config.json`. The JSON defines:
 - `Connectivity` — MQTT broker connection (`ClientName`, `MqttIp`, `MqttPort`)
 - `Rooms[]` — array of rooms, each with `Name` and `Points[]`
-- Each point has: `Name`, `Type` (currently only `"Light"`), `GpioControlPin`, `GpioButtonPin`
+- **Light points** have: `Name`, `Type: "Light"`, `GpioControlPin`, `GpioButtonPin`
+- **Blind points** have: `Name`, `Type: "Blind"`, `GpioControlPinUp`, `GpioControlPinDown`, `GpioButtonPinUp`, `GpioButtonPinDown`, `FullTravelTimeSec`
 
 > **CRITICAL**: GPIO pin numbers are physical wiring assignments. Never change pin
 > numbers without verifying against the actual hardware wiring.
@@ -81,4 +82,5 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 2. **Never run `systemctl` commands** in suggestions without warning
 3. **Preserve the MQTT topic structure** — OpenHAB Things depend on exact topic paths
 4. **Keep OpenHAB item channel bindings** in sync with MQTT thing channels
-5. **Test changes with unit tests** before suggesting deployment
+5. **Never activate both blind motor relays simultaneously** — safety interlock with 500ms delay on reversal
+6. **Test changes with unit tests** before suggesting deployment

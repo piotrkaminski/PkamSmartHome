@@ -16,6 +16,15 @@
                     "Type": "Light",
                     "GpioControlPin": 2,
                     "GpioButtonPin": 3
+                },
+                {
+                    "Name": "WindowBlind",
+                    "Type": "Blind",
+                    "GpioControlPinUp": 13,
+                    "GpioControlPinDown": 19,
+                    "GpioButtonPinUp": 23,
+                    "GpioButtonPinDown": 24,
+                    "FullTravelTimeSec": 25.0
                 }
             ]
         },{
