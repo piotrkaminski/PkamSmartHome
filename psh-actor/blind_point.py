@@ -69,8 +69,7 @@ class BlindPoint(Point):
 
     def reset(self):
         self.stop()
-        self.position = 0.0
-        self.notifyCurrentState()
+        self.moveToPosition(0.0)
 
     def moveUp(self):
         self._cancelTimer()

@@ -285,14 +285,28 @@ class BlindPointTest(TestCase):
 
     # --- reset tests ---
 
-    def test_reset_sets_position_to_zero(self):
+    def test_reset_moves_blind_to_up_position(self):
         point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=75.0)
+
+        with patch('blind_point.time', return_value=1000.0):
+            with patch('threading.Timer') as mock_timer_class:
+                mock_timer = Mock()
+                mock_timer_class.return_value = mock_timer
+                point.reset()
+
+                expected_duration = 75.0 / 100.0 * 20.0
+                mock_timer_class.assert_called_once_with(expected_duration, point._onTimerExpired, args=[0.0])
+                mock_timer.start.assert_called_once()
+        relay_up.on.assert_called_once()
+        relay_down.on.assert_not_called()
+
+    def test_reset_when_already_at_zero_notifies_only(self):
+        point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=0.0)
 
         point.reset()
 
-        self.assertEqual(0.0, point.position)
-        relay_up.off.assert_called()
-        relay_down.off.assert_called()
+        relay_up.on.assert_not_called()
+        relay_down.on.assert_not_called()
         comm_srv.sendStatusUpdate.assert_called_with(point_id="/RoomA/Blind1", message="0")
 
     # --- notifyCurrentState tests ---
