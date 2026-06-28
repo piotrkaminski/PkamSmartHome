@@ -73,6 +73,7 @@ class BlindPoint(Point):
 
     def moveUp(self):
         self._cancelTimer()
+        self._updatePosition()
         wasMovingDown = self._movementDirection == "down"
         self._stopRelays()
         if wasMovingDown:
@@ -80,13 +81,18 @@ class BlindPoint(Point):
         if self.position <= 0.0:
             logging.info("Blind {id} already fully open, ignoring UP".format(id=self.id))
             return
+        duration = self.position / 100.0 * self.fullTravelTimeSec
         self._movementDirection = "up"
         self._movementStartTime = time()
         self.relayUp.on()
-        logging.info("Blind {id} moving UP from {pos}%".format(id=self.id, pos=int(self.position)))
+        logging.info("Blind {id} moving UP from {pos}% (duration: {dur:.1f}s)"
+            .format(id=self.id, pos=int(self.position), dur=duration))
+        self._movementTimer = threading.Timer(duration, self._onTimerExpired, args=[0.0])
+        self._movementTimer.start()
 
     def moveDown(self):
         self._cancelTimer()
+        self._updatePosition()
         wasMovingUp = self._movementDirection == "up"
         self._stopRelays()
         if wasMovingUp:
@@ -94,10 +100,15 @@ class BlindPoint(Point):
         if self.position >= 100.0:
             logging.info("Blind {id} already fully closed, ignoring DOWN".format(id=self.id))
             return
+        remaining = 100.0 - self.position
+        duration = remaining / 100.0 * self.fullTravelTimeSec
         self._movementDirection = "down"
         self._movementStartTime = time()
         self.relayDown.on()
-        logging.info("Blind {id} moving DOWN from {pos}%".format(id=self.id, pos=int(self.position)))
+        logging.info("Blind {id} moving DOWN from {pos}% (duration: {dur:.1f}s)"
+            .format(id=self.id, pos=int(self.position), dur=duration))
+        self._movementTimer = threading.Timer(duration, self._onTimerExpired, args=[100.0])
+        self._movementTimer.start()
 
     def stop(self):
         self._cancelTimer()

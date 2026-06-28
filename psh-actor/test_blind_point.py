@@ -24,11 +24,18 @@ class BlindPointTest(TestCase):
 
     # --- moveUp tests ---
 
-    def test_moveUp_activates_up_relay(self):
+    def test_moveUp_activates_up_relay_and_schedules_timer(self):
         point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=50.0)
 
-        point.moveUp()
+        with patch('blind_point.time', return_value=1000.0):
+            with patch('threading.Timer') as mock_timer_class:
+                mock_timer = Mock()
+                mock_timer_class.return_value = mock_timer
+                point.moveUp()
 
+                expected_duration = 50.0 / 100.0 * 20.0
+                mock_timer_class.assert_called_once_with(expected_duration, point._onTimerExpired, args=[0.0])
+                mock_timer.start.assert_called_once()
         relay_up.on.assert_called_once()
         relay_down.on.assert_not_called()
         self.assertEqual("up", point._movementDirection)
@@ -39,8 +46,11 @@ class BlindPointTest(TestCase):
         point._movementDirection = "down"
 
         with patch('blind_point.sleep') as mock_sleep:
-            point.moveUp()
-            mock_sleep.assert_called_once_with(0.5)
+            with patch('blind_point.time', return_value=1000.0):
+                with patch('threading.Timer') as mock_timer_class:
+                    mock_timer_class.return_value = Mock()
+                    point.moveUp()
+                    mock_sleep.assert_called_once_with(0.5)
 
         relay_up.off.assert_called()
         relay_down.off.assert_called()
@@ -56,11 +66,18 @@ class BlindPointTest(TestCase):
 
     # --- moveDown tests ---
 
-    def test_moveDown_activates_down_relay(self):
+    def test_moveDown_activates_down_relay_and_schedules_timer(self):
         point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=50.0)
 
-        point.moveDown()
+        with patch('blind_point.time', return_value=1000.0):
+            with patch('threading.Timer') as mock_timer_class:
+                mock_timer = Mock()
+                mock_timer_class.return_value = mock_timer
+                point.moveDown()
 
+                expected_duration = 50.0 / 100.0 * 20.0
+                mock_timer_class.assert_called_once_with(expected_duration, point._onTimerExpired, args=[100.0])
+                mock_timer.start.assert_called_once()
         relay_down.on.assert_called_once()
         relay_up.on.assert_not_called()
         self.assertEqual("down", point._movementDirection)
@@ -71,8 +88,11 @@ class BlindPointTest(TestCase):
         point._movementDirection = "up"
 
         with patch('blind_point.sleep') as mock_sleep:
-            point.moveDown()
-            mock_sleep.assert_called_once_with(0.5)
+            with patch('blind_point.time', return_value=1000.0):
+                with patch('threading.Timer') as mock_timer_class:
+                    mock_timer_class.return_value = Mock()
+                    point.moveDown()
+                    mock_sleep.assert_called_once_with(0.5)
 
         relay_up.off.assert_called()
         relay_down.off.assert_called()
@@ -323,7 +343,10 @@ class BlindPointTest(TestCase):
     def test_button_up_press_starts_moveUp(self):
         point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=50.0)
 
-        point._onButtonUpPressed()
+        with patch('blind_point.time', return_value=1000.0):
+            with patch('threading.Timer') as mock_timer_class:
+                mock_timer_class.return_value = Mock()
+                point._onButtonUpPressed()
 
         relay_up.on.assert_called_once()
         self.assertEqual("up", point._movementDirection)
@@ -343,7 +366,10 @@ class BlindPointTest(TestCase):
     def test_button_down_press_starts_moveDown(self):
         point, comm_srv, relay_up, relay_down = self._createBlindPoint(position=50.0)
 
-        point._onButtonDownPressed()
+        with patch('blind_point.time', return_value=1000.0):
+            with patch('threading.Timer') as mock_timer_class:
+                mock_timer_class.return_value = Mock()
+                point._onButtonDownPressed()
 
         relay_down.on.assert_called_once()
         self.assertEqual("down", point._movementDirection)
