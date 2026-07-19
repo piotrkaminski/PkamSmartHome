@@ -10,6 +10,5 @@ Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {
       Type switch : gfLivingroomCeiling23  [ stateTopic="/Pi1/Out/Livingroom/Ceiling23" , commandTopic="/Pi1/In/Livingroom/Ceiling23", on="ON", off="OFF"]
       Type switch : gfDiningroomCeiling13  [ stateTopic="/Pi1/Out/Diningroom/Ceiling13" , commandTopic="/Pi1/In/Diningroom/Ceiling13", on="ON", off="OFF"]
       Type switch : gfDiningroomCeiling23  [ stateTopic="/Pi1/Out/Diningroom/Ceiling23" , commandTopic="/Pi1/In/Diningroom/Ceiling23", on="ON", off="OFF"]
-      Type rollershutter : gfOfficeWindowBlind  [ stateTopic="/Pi1/Out/Office/WindowBlind" , commandTopic="/Pi1/In/Office/WindowBlind", up="UP", down="DOWN", stop="STOP"]
     }
 }
