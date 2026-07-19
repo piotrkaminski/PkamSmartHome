@@ -29,7 +29,7 @@
     1. Provide additional details if would like to.
     1. Execute `sudo usermod -aG sudo pshactor`
     1. Exectue `sudo usermod -a -G gpio pshactor`
-    1. Exectue `sudo chown root.gpio /dev/mem && sudo chmod g+rw /dev/mem`
+    1. Exectue `sudo chown root:gpio /dev/mem && sudo chmod g+rw /dev/mem`
 1. Reboot system `sudo reboot`
 
 ## PkamSmartHome Actor installation

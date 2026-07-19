@@ -6,7 +6,8 @@ description: >
   OpenHAB configuration (Things, Items, Rules, Sitemaps), psh-actor Python
   service, systemd service management, or home automation workflows.
   Trigger on: 'smart home', 'GPIO', 'MQTT', 'OpenHAB', 'psh-actor',
-  'light point', 'room configuration', 'openHABian', 'HomeKit',
+  'light point', 'blind point', 'window blind', 'rollershutter',
+  'room configuration', 'openHABian', 'HomeKit', 'WindowCovering',
   'TP-Link', 'Mosquitto', 'Astro binding', 'systemd service'.
 ---
 
@@ -61,15 +62,27 @@ All MQTT topics follow this structure:
 
 | Command | Payload | Effect |
 |---------|---------|--------|
-| `RESET` | `RESET` | Turns OFF all points and sends state update |
+| `RESET` | `RESET` | Turns OFF all lights, fully opens all blinds, sends state update |
 | `NOTIFY_CURRENT_STATE` | `NOTIFY_CURRENT_STATE` | Publishes current state of all points |
 
-### Point Commands
+### Light Point Commands
 
 | Command | Payload |
 |---------|---------|
 | Turn ON | `ON` |
 | Turn OFF | `OFF` |
+
+### Blind Point Commands
+
+| Command | Payload | Effect |
+|---------|---------|--------|
+| Move up | `UP` | Start opening (continuous until STOP) |
+| Move down | `DOWN` | Start closing (continuous until STOP) |
+| Stop | `STOP` | Stop any movement |
+| Go to position | `0`–`100` | Move to target percentage (0=fully open, 100=fully closed) |
+
+Predefined positions: `0` (fully open), `50` (half), `67` (2/3 closed), `100` (fully closed).
+State is published as an integer percentage (e.g., `0`, `50`, `67`, `100`).
 
 ### Wildcard Subscription
 
@@ -97,10 +110,19 @@ The actor configuration lives at `psh-actor/config/config.json`:
       "Name": "<room name, used in MQTT topics and point IDs>",
       "Points": [
         {
-          "Name": "<point name, used in MQTT topics>",
+          "Name": "<point name>",
           "Type": "Light",
-          "GpioControlPin": "<BCM pin number for relay output (integer)>",
-          "GpioButtonPin": "<BCM pin number for button input (integer)>"
+          "GpioControlPin": "<BCM pin for relay output (integer)>",
+          "GpioButtonPin": "<BCM pin for button input (integer)>"
+        },
+        {
+          "Name": "<point name>",
+          "Type": "Blind",
+          "GpioControlPinUp": "<BCM pin for UP relay (integer)>",
+          "GpioControlPinDown": "<BCM pin for DOWN relay (integer)>",
+          "GpioButtonPinUp": "<BCM pin for UP button (integer)>",
+          "GpioButtonPinDown": "<BCM pin for DOWN button (integer)>",
+          "FullTravelTimeSec": "<seconds for full open→close travel (float)>"
         }
       ]
     }
@@ -108,7 +130,7 @@ The actor configuration lives at `psh-actor/config/config.json`:
 }
 ```
 
-### Current Room/Point Layout
+### Current Room/Point Layout — Lights
 
 | Room | Point | Control Pin | Button Pin | MQTT Topic Suffix |
 |------|-------|------------|------------|-------------------|
@@ -120,6 +142,16 @@ The actor configuration lives at `psh-actor/config/config.json`:
 | Diningroom | Ceiling13 | 9 | 22 | `/Diningroom/Ceiling13` |
 | Marysia | Ceiling13 | 12 | 16 | `/Marysia/Ceiling13` |
 | Marysia | Ceiling23 | 20 | 21 | `/Marysia/Ceiling23` |
+
+### Current Room/Point Layout — Blinds
+
+| Room | Point | CtlUp | CtlDown | BtnUp | BtnDown | Travel (s) | MQTT Topic Suffix |
+|------|-------|-------|---------|-------|---------|------------|-------------------|
+| Office | WindowBlind | TBD | TBD | TBD | TBD | 25.0 | `/Office/WindowBlind` |
+
+> [!WARNING]
+> The Office WindowBlind GPIO pins are set to `0` (placeholder). They must be
+> updated with actual BCM pin numbers matching the physical wiring before deployment.
 
 > [!CAUTION]
 > GPIO pin numbers are BCM (Broadcom) numbering. They map to physical wiring.
@@ -134,8 +166,8 @@ The actor configuration lives at `psh-actor/config/config.json`:
 
 ```
 Point (base class)
-  └── LightPoint (GPIO relay + button)
-      └── (future: DimmerPoint, ShutterPoint, etc.)
+  ├── LightPoint  (1 relay + 1 button, binary ON/OFF)
+  └── BlindPoint   (2 relays + 2 buttons, position 0–100%)
 ```
 
 ### Point Base Class (`point.py`)
@@ -153,16 +185,33 @@ Abstract base with four lifecycle methods:
 - Button press triggers `toggle()` → changes state + notifies hub
 - Reset turns OFF and notifies
 
+### BlindPoint (`blind_point.py`)
+
+- Uses two `gpiozero.DigitalOutputDevice` for UP and DOWN relay control
+- Uses two `gpiozero.Button` for physical UP and DOWN buttons (hold-to-move)
+- **Position model**: 0.0 (fully open) to 100.0 (fully closed), tracked via elapsed time
+- **Time-based movement**: position delta = `elapsed / FullTravelTimeSec * 100%`
+- **Safety interlock**: both relays never active simultaneously; 500ms delay on direction reversal
+- **Timed go-to-position**: uses `threading.Timer` to auto-stop at target position
+- **Button behavior**: press = start moving, release = stop (direction-aware)
+- Reset fully opens (position = 0) and notifies
+- Position does not persist across restarts (resets to 0 = fully open)
+
 ### Point Factory (`point_factory.py`)
 
 Creates points from JSON configuration. Point ID format: `/{RoomName}/{PointName}`
 
+The factory delegates to type-specific creation methods:
+- `_createLightPoint()` — validates `GpioControlPin`, `GpioButtonPin`
+- `_createBlindPoint()` — validates `GpioControlPinUp`, `GpioControlPinDown`, `GpioButtonPinUp`, `GpioButtonPinDown`, `FullTravelTimeSec`
+
 ### Adding a New Point Type
 
 1. Create a new class inheriting from `Point`
-2. Add a new `CONFIG_POINT_TYPE_*` constant
-3. Add a new `elif` branch in `PointFactory.createPoint()`
+2. Add a new `CONFIG_POINT_TYPE_*` constant in `constants.py`
+3. Add a new `_create*Point()` method and `elif` branch in `PointFactory.createPoint()`
 4. Add corresponding OpenHAB Thing channel, Item, and Sitemap entry
+5. Create `test_{module}.py` with mocked GPIO
 
 ---
 
@@ -184,9 +233,9 @@ openhab/
     └── watch.sitemap      # Simplified watch/mobile UI
 ```
 
-### Thing Definition Pattern
+### Thing Definition Patterns
 
-MQTT-controlled points follow this pattern in `orzechowa.things`:
+MQTT-controlled **lights** use `Type switch` in `orzechowa.things`:
 
 ```
 Type switch : channelId [
@@ -196,19 +245,43 @@ Type switch : channelId [
 ]
 ```
 
-### Item Definition Pattern
+MQTT-controlled **blinds** use `Type rollershutter`:
 
-Items in `orzechowa.items` follow:
+```
+Type rollershutter : channelId [
+  stateTopic="/{ActorName}/Out/{Room}/{Point}",
+  commandTopic="/{ActorName}/In/{Room}/{Point}",
+  up="UP", down="DOWN", stop="STOP"
+]
+```
+
+### Item Definition Patterns
+
+Light items in `orzechowa.items`:
 
 ```
 Switch  ItemName  "Label"  <icon>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId", homekit="Lighting"}
 ```
 
-### Light Groups
+Blind items:
 
-Groups with aggregation functions allow controlling multiple lights:
-- `Group:Switch:AND(ON, OFF)` — all-on / all-off semantics
-- `Group:Switch:OR(ON, OFF)` — any-on semantics (used for ceiling light groups)
+```
+Rollershutter  ItemName  "Label"  <rollershutter>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId", homekit="WindowCovering"}
+```
+
+Blind sitemap controls (slider + preset buttons):
+
+```
+Slider item=Room_Blind
+Switch item=Room_Blind mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]
+```
+
+### Groups
+
+Groups with aggregation functions:
+- `Group:Switch:AND(ON, OFF)` — all-on / all-off semantics (lights)
+- `Group:Switch:OR(ON, OFF)` — any-on semantics (ceiling light groups)
+- `Group gBlind` — all blinds group (no aggregation function)
 
 ### Automation Rules
 
@@ -299,7 +372,8 @@ python3 -m unittest discover -p 'test_*.py'
 |--------|-----------|---------|
 | `hub_communication_service.py` | `test_hub_comminication_service.py` | Topic parsing, message routing, admin commands |
 | `light_point.py` | `test_light_point.py` | ON/OFF, toggle, reset, notify state |
-| `point_factory.py` | `test_point_factory.py` | Point creation, validation errors |
+| `blind_point.py` | `test_blind_point.py` | UP/DOWN/STOP, position tracking, timer, interlock, buttons, reset |
+| `point_factory.py` | `test_point_factory.py` | Light + Blind creation, validation errors |
 | `room.py` | `test_room.py` | Room init, point delegation |
 | `rooms_service.py` | `test_rooms_service.py` | Room lookup, status routing |
 
@@ -310,16 +384,26 @@ python3 -m unittest discover -p 'test_*.py'
 
 ---
 
-## Adding a New Room or Light Point
+## Adding New Points
 
 ### Workflow: Add a New GPIO-Controlled Light
 
 1. **Wire the hardware** — connect relay to a free GPIO output pin, button to a free GPIO input pin
-2. **Update `config.json`** — add a point entry under the appropriate room (or create a new room)
+2. **Update `config.json`** — add a point with `"Type": "Light"` under the appropriate room
 3. **Update `orzechowa.things`** — add a new `Type switch` channel with matching MQTT topics
-4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel, with HomeKit tag
+4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel, with `homekit="Lighting"`
 5. **Update `orzechowa.sitemap`** — add the item to the appropriate frame
 6. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
+
+### Workflow: Add a New GPIO-Controlled Blind
+
+1. **Wire the hardware** — connect UP relay, DOWN relay, UP button, DOWN button to 4 free GPIO pins
+2. **Update `config.json`** — add a point with `"Type": "Blind"` including all 4 pin numbers and `FullTravelTimeSec`
+3. **Measure travel time** — time the blind from fully open to fully closed and set `FullTravelTimeSec`
+4. **Update `orzechowa.things`** — add a `Type rollershutter` channel with `up="UP", down="DOWN", stop="STOP"`
+5. **Update `orzechowa.items`** — add a `Rollershutter` item with `homekit="WindowCovering"`, add to `gBlind` group
+6. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with preset `mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]`
+7. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
 
 ### Workflow: Add a New TP-Link Wi-Fi Device
 
@@ -335,9 +419,11 @@ python3 -m unittest discover -p 'test_*.py'
 
 > [!WARNING]
 > - **GPIO pins are hardware-mapped** — never change pin numbers without physical verification
+> - **Blind motors have safety interlocks** — both relays must NEVER be active simultaneously; 500ms delay on direction reversal
 > - **MQTT topics must be consistent** across `config.json`, `orzechowa.things`, and `orzechowa.rules`
 > - **The actor uses `signal.pause()`** — it blocks the main thread and relies on MQTT callbacks and GPIO interrupts
 > - **No authentication on MQTT** — Mosquitto runs without passwords (local network only)
 > - **Labels are in Polish** — OpenHAB UI labels use Polish language; maintain this convention
 > - **The `install-config.sh` script is destructive** — it deletes all existing OpenHAB config before copying new files
 > - **Service depends on `mosquitto.service`** — MQTT broker must start before psh-actor
+> - **Blind position does not persist** — on restart, position resets to 0% (fully open)

@@ -143,3 +143,67 @@ class PointFactoryTest(TestCase):
             room_name=room_name, 
             configuration=conf, 
             comm_service=comm_service))
+
+    def test_create_blind_point_success(self):
+        conf = {
+                    "Name": "Blind1",
+                    "Type": "Blind",
+                    "GpioControlPinUp": 14,
+                    "GpioControlPinDown": 15,
+                    "GpioButtonPinUp": 23,
+                    "GpioButtonPinDown": 24,
+                    "FullTravelTimeSec": 25.0
+                }
+        room_name = "RoomU"
+        comm_service = Mock()
+        point = self.point_factory.createPoint(
+            room_name=room_name,
+            configuration=conf,
+            comm_service=comm_service)
+        self.assertEqual("/RoomU/Blind1", point.id)
+        self.assertEqual(14, point.controlPinUp)
+        self.assertEqual(15, point.controlPinDown)
+        self.assertEqual(23, point.buttonPinUp)
+        self.assertEqual(24, point.buttonPinDown)
+        self.assertEqual(25.0, point.fullTravelTimeSec)
+        self.assertIsNotNone(point.relayUp)
+        self.assertIsNotNone(point.relayDown)
+        self.assertIsNotNone(point.buttonUp)
+        self.assertIsNotNone(point.buttonDown)
+
+    def test_create_blind_point_missing_pins(self):
+        base_conf = {
+                    "Name": "Blind1",
+                    "Type": "Blind",
+                    "GpioControlPinUp": 14,
+                    "GpioControlPinDown": 15,
+                    "GpioButtonPinUp": 23,
+                    "GpioButtonPinDown": 24,
+                    "FullTravelTimeSec": 25.0
+                }
+        room_name = "RoomW"
+        comm_service = Mock()
+
+        for pin_key in ["GpioControlPinUp", "GpioControlPinDown", "GpioButtonPinUp", "GpioButtonPinDown"]:
+            conf = dict(base_conf)
+            del conf[pin_key]
+            self.assertRaises(ValueError, lambda: self.point_factory.createPoint(
+                room_name=room_name,
+                configuration=conf,
+                comm_service=comm_service))
+
+    def test_create_blind_point_missing_travel_time(self):
+        conf = {
+                    "Name": "Blind1",
+                    "Type": "Blind",
+                    "GpioControlPinUp": 14,
+                    "GpioControlPinDown": 15,
+                    "GpioButtonPinUp": 23,
+                    "GpioButtonPinDown": 24
+                }
+        room_name = "RoomW"
+        comm_service = Mock()
+        self.assertRaises(ValueError, lambda: self.point_factory.createPoint(
+            room_name=room_name,
+            configuration=conf,
+            comm_service=comm_service))

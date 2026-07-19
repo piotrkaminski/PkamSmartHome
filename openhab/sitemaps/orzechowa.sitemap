@@ -11,6 +11,8 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Office_Lamp
         Slider item=Office_Biurko
         Switch item=Office_Biurko
+        Slider item=Office_WindowBlind
+        Switch item=Office_WindowBlind mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]
     }
 
 
