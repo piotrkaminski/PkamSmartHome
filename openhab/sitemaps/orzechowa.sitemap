@@ -4,6 +4,7 @@ sitemap orzechowa label="Orzechowa" {
         Text item=Sunrise_Time
         Text item=Sunset_Time
         Text item=Sun_Elevation
+        Text item=Weather_Temp_Max_Today
     }
 
     Frame label="Gabinet" {
@@ -12,7 +13,7 @@ sitemap orzechowa label="Orzechowa" {
         Slider item=Office_Biurko
         Switch item=Office_Biurko
         Slider item=Office_WindowBlind
-        Switch item=Office_WindowBlind mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]
+        Switch item=Office_WindowBlind mappings=[100="Otwórz", 75="Połowa", 10="Zamknij"]
     }
 
 

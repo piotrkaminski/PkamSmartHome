@@ -4,7 +4,7 @@ Group:Switch:AND(ON, OFF)   gLight         "Wszystkie światła"  <light>       
 Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>   (gLight) 
 Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła" <outdoorlight>   (gLight) 
 Group:Switch:AND(ON, OFF)   gAwayLights    "Tryb nieobecność"   <light>          (gLight) 
-Group                       gBlind         "Wszystkie rolety"   <rollershutter>  (Home)
+Group                       gWindowBlinds  "Wszystkie rolety"   <rollershutter>  (Home)
 
 // Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              
@@ -12,7 +12,7 @@ Group    Office             "Biuro"             <office>        (GF)
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 Switch   Office_Lamp        "Biuro Lampa"       <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
-Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gBlind)               {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
+Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gWindowBlinds)               {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
 
 Group    Livingroom         "Salon"             <video>         (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}
@@ -47,3 +47,4 @@ DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calen
 DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start"}
 DateTime Sunset_Time        "Sunset [%1$tH:%1$tM]"                        <sunset>       {channel="astro:sun:home:set#start"}
 Number   Sun_Elevation      "Sun Elevation [%.2f°]"                                      {channel="astro:sun:home:position#elevation"}
+Number:Temperature Weather_Temp_Max_Today "Temperatura dziś max [%.1f °C]" <temperature> { channel="openmeteo:weather-forecast:local:forecastToday#temperature-max" }

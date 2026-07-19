@@ -62,3 +62,20 @@ then
         }
     }
 end
+
+
+// Close blinds in Gabinet if today is hot (over 27°C)
+rule "Zabezpieczenie przed upałem w Gabinecie"
+when
+    Time cron "0 0 8 * * ?" // Codziennie o 08:00 rano
+then
+    if (Weather_Temp_Max_Today.state instanceof QuantityType) {
+        val tempMax = (Weather_Temp_Max_Today.state as QuantityType<Number>).doubleValue
+        if (tempMax > 27.0) {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> 27°C). Zamykam rolety w grupie gWindowBlinds do 10%.", tempMax)
+            gWindowBlinds.sendCommand(10)
+        }
+    } else {
+        logWarning("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", Weather_Temp_Max_Today.state)
+    }
+end
