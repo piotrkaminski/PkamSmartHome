@@ -47,4 +47,4 @@ DateTime Date               "Date [%1$tA, %1$td.%1$tm.%1$tY %1$tH:%1$tM]" <calen
 DateTime Sunrise_Time       "Sunrise [%1$tH:%1$tM]"                       <sunrise>      {channel="astro:sun:home:rise#start"}
 DateTime Sunset_Time        "Sunset [%1$tH:%1$tM]"                        <sunset>       {channel="astro:sun:home:set#start"}
 Number   Sun_Elevation      "Sun Elevation [%.2f°]"                                      {channel="astro:sun:home:position#elevation"}
-Number:Temperature Weather_Temp_Max_Today "Temperatura dziś max [%.1f °C]" <temperature> { channel="openmeteo:weather-forecast:local:forecastToday#temperature-max" }
+Number:Temperature Weather_Temp_Max_Today "Temperatura dziś max [%.1f °C]" <temperature> { channel="openmeteo:forecast:local:local:forecastToday#temperature-max" }
