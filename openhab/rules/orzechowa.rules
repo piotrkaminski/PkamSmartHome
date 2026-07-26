@@ -77,7 +77,7 @@ then
             logWarn("WeatherRule", "Nie można przeliczyć Weather_Temp_Max_Today na °C (obecny stan: {}).", tempState)
         } else if (tempMax.doubleValue > 27.0) {
             logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> 27°C). Zamykam rolety w grupie gWindowBlinds do 90%.", tempMax.doubleValue)
-            gWindowBlinds.sendCommand(90)
+            gWindowBlinds.sendCommand(60)
         } else {
             logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= 27°C). Rolety bez zmian.", tempMax.doubleValue)
         }
