@@ -29,6 +29,8 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Livingroom_1_3
         Switch item=Livingroom_2_3
         Switch item=Livingroom_Lampa
+        Slider item=Livingroom_WindowBlind
+        Switch item=Livingroom_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
     }
 
     Frame label="Jadalnia" {
