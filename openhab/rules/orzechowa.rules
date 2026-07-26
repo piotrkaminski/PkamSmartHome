@@ -1,3 +1,6 @@
+val Double TEMP_INIT_CLOSING = 27.0
+val Double SUN_ELEVATION_OPENING = 10.0
+
 // Notify current state on startup
 rule "Startup"
 when
@@ -12,10 +15,9 @@ end
 // Switch on lights
 rule "Start night lights on sunset"
 when
-    Channel "astro:sun:home:set#event" triggered END
+    Channel "astro:sun:home:set#event" triggered START
 then
-    logInfo("Sunset Rule", "Sunset occurred, opening all blinds and scheduling night lights ON in 30 minutes. Current Away state: {}", gNightLights.state)
-    gWindowBlinds.sendCommand(UP)
+    logInfo("Sunset Rule", "Sunset occurred, scheduling night lights ON in 30 minutes. Current Away state: {}", gNightLights.state)
     createTimer(now.plusMinutes(30), [ |
         logInfo("Sunset Rule", "Turning on night lights")
         gNightLights.sendCommand(ON)
@@ -49,7 +51,7 @@ end
 // Switch off lights
 rule "Switch off night lights on sunrise"
 when
-    Channel "astro:sun:home:rise#event" triggered END
+    Channel "astro:sun:home:rise#event" triggered START
 then
     logInfo("Astro", "Sun rise occured, elevation {}, lights to be disables", Sun_Elevation.state)
     gNightLights.sendCommand(OFF)
@@ -68,13 +70,39 @@ then
         val tempMax = (tempState as QuantityType<Number>).toUnit("°C")
         if (tempMax === null) {
             logWarn("WeatherRule", "Nie można przeliczyć Weather_Temp_Max_Today na °C (obecny stan: {}).", tempState)
-        } else if (tempMax.doubleValue > 27.0) {
-            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> 27°C). Zamykam rolety w grupie gWindowBlinds do 90%.", tempMax.doubleValue)
+        } else if (tempMax.doubleValue > TEMP_INIT_CLOSING) {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> {}°C). Zamykam rolety w grupie gWindowBlinds do 90%.", tempMax.doubleValue, TEMP_INIT_CLOSING)
             gWindowBlinds.sendCommand(60)
         } else {
-            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= 27°C). Rolety bez zmian.", tempMax.doubleValue)
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= {}°C). Rolety bez zmian.", tempMax.doubleValue, TEMP_INIT_CLOSING)
         }
     } else {
         logWarn("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", tempState)
+    }
+end
+
+// Open blinds when sun is low and it was hot today
+rule "Otwarcie rolet po upalnym dniu"
+when
+    Item Sun_Elevation changed
+then
+    val elevationState = Sun_Elevation.state
+    if (elevationState instanceof DecimalType) {
+        val elevation = (elevationState as DecimalType).doubleValue
+        val prevElevationState = previousState
+        val prevElevation = if (prevElevationState instanceof DecimalType) (prevElevationState as DecimalType).doubleValue else 999.0
+
+        if (elevation < SUN_ELEVATION_OPENING && prevElevation >= SUN_ELEVATION_OPENING && now.getHour >= 13) {
+            val tempState = Weather_Temp_Max_Today.state
+            if (tempState instanceof QuantityType<?>) {
+                val tempMax = (tempState as QuantityType<Number>).toUnit("°C")
+                if (tempMax !== null && tempMax.doubleValue > TEMP_INIT_CLOSING) {
+                    logInfo("WeatherRule", "Słońce nisko ({}° < {}°) i dziś było gorąco ({}°C > {}°C). Otwieram rolety w grupie gWindowBlinds.", elevation, SUN_ELEVATION_OPENING, tempMax.doubleValue, TEMP_INIT_CLOSING)
+                    gWindowBlinds.sendCommand(UP)
+                }
+            } else {
+                logWarn("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", tempState)
+            }
+        }
     }
 end
