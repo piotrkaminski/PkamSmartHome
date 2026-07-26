@@ -106,3 +106,27 @@ then
         }
     }
 end
+
+// Scene: Working in Office
+rule "Scena Praca w biurze"
+when
+    Item Office_Scene_Working received command ON
+then
+    logInfo("Scene", "Activating Working in Office scene")
+    Office_Light.sendCommand(OFF)
+    Office_Biurko.sendCommand(ON)
+    Office_Scene_Working.postUpdate(OFF)
+end
+
+// Scene: Kino
+rule "Scena Kino"
+when
+    Item Livingroom_Scene_Kino received command ON
+then
+    logInfo("Scene", "Activating Kino scene")
+    gLivingroomCeilingLight.sendCommand(OFF)
+    Livingroom_LedTV.sendCommand(ON)
+    Livingroom_Lampa.sendCommand(ON)
+    Livingroom_Scene_Kino.postUpdate(OFF)
+end
+

@@ -13,6 +13,8 @@ Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 Switch   Office_Lamp        "Biuro Lampa"       <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
 Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
+Switch   Office_Scene_Working "Scena Praca w biurze" <present>      (Office)                       {homekit="Switchable"}
+
 
 Group    Livingroom         "Salon"             <video>         (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}
@@ -21,6 +23,7 @@ Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLi
 Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  {homekit="Lighting"}
 Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight, gAwayLights)      {channel="tplinksmarthome:hs100:B744EB:switch", homekit="Lighting"}
 Rollershutter Livingroom_WindowBlind "Salon Roleta" <rollershutter> (Livingroom, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3b2b1c:roller#control", homekit="WindowCovering"}
+Switch   Livingroom_Scene_Kino "Scena Kino"         <present>      (Livingroom)                       {homekit="Switchable"}
 
 
 Group    Diningroom         "Jadalnia"          <presence>      (GF)

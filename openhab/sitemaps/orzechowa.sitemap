@@ -14,7 +14,9 @@ sitemap orzechowa label="Orzechowa" {
     }
 
     Frame label="Gabinet" {
+        Switch item=Office_Scene_Working mappings=[ON="Uruchom"]
         Switch item=Office_Light
+
         Switch item=Office_Lamp
         Slider item=Office_Biurko
         Switch item=Office_Biurko
@@ -24,6 +26,7 @@ sitemap orzechowa label="Orzechowa" {
 
 
     Frame label="Salon" {
+        Switch item=Livingroom_Scene_Kino mappings=[ON="Uruchom"]
         Switch item=Livingroom_LedTV
         Switch item=gLivingroomCeilingLight
         Switch item=Livingroom_1_3
