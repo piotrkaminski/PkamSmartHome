@@ -1,10 +1,23 @@
 ntp:ntp:currentTime  [ hostname="nl.pool.ntp.org", refreshInterval=60, refreshNtp=30 ]
 astro:sun:home       [ geolocation="51.029277, 17.114613, 121", interval=60]
-Bridge openmeteo:bridge:local [ refreshInterval=60 ] {
-    Thing forecast local [ 
-        geolocation="51.029277,17.114613",
-        dailySplit=true
-    ]
+
+// Weather forecast from Open-Meteo (https://open-meteo.com) - free tier, no API key required.
+// Uses the core HTTP binding + JSONPATH so no third-party marketplace add-on is needed.
+// REQUIRES the JSONPATH transformation add-on: `openhab-transformation-jsonpath`
+// Free tier allows 10k calls/day; refresh=1800s -> 48 calls/day. All channels below
+// share the same URL, so one poll refreshes all of them.
+Thing http:url:openmeteo "Open-Meteo Orzechowa" [
+    baseURL="https://api.open-meteo.com/v1/forecast?latitude=51.029277&longitude=17.114613&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=auto&forecast_days=2",
+    refresh=1800,
+    timeout=5000,
+    stateMethod="GET"
+] {
+    Channels:
+        Type number : tempMaxToday    "Temperatura dziś max"     [ stateTransformation="JSONPATH($.daily.temperature_2m_max[0])",  unit="°C", mode="READONLY" ]
+        Type number : tempMinToday    "Temperatura dziś min"     [ stateTransformation="JSONPATH($.daily.temperature_2m_min[0])",  unit="°C", mode="READONLY" ]
+        Type number : rainToday       "Opady dziś"               [ stateTransformation="JSONPATH($.daily.precipitation_sum[0])",   unit="mm", mode="READONLY" ]
+        Type number : weatherCodeToday "Kod pogody dziś"         [ stateTransformation="JSONPATH($.daily.weather_code[0])",                   mode="READONLY" ]
+        Type number : tempMaxTomorrow "Temperatura jutro max"    [ stateTransformation="JSONPATH($.daily.temperature_2m_max[1])",  unit="°C", mode="READONLY" ]
 }
 
 Bridge mqtt:broker:pshActor1  [ host="localhost", secure=false ] {

@@ -33,7 +33,7 @@ end
 rule "Switch on Xmas lights"
 when
     Time cron "0 0 16 6-31 DEC ? *" or
-    Time cron "0 15 16 1-15 JAN *"
+    Time cron "0 15 16 1-15 JAN ? *"
 then
     gNightLights.sendCommand(OFF)
     gXmasLights.sendCommand(ON)
@@ -65,17 +65,23 @@ end
 
 
 // Close blinds in Gabinet if today is hot (over 27°C)
+// Position convention: 0% = fully open (Otwórz), 100% = fully closed (Zamknij).
 rule "Zabezpieczenie przed upałem w Gabinecie"
 when
     Time cron "0 0 8 * * ?" // Codziennie o 08:00 rano
 then
-    if (Weather_Temp_Max_Today.state instanceof QuantityType) {
-        val tempMax = (Weather_Temp_Max_Today.state as QuantityType<Number>).doubleValue
-        if (tempMax > 27.0) {
-            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> 27°C). Zamykam rolety w grupie gWindowBlinds do 10%.", tempMax)
-            gWindowBlinds.sendCommand(10)
+    val tempState = Weather_Temp_Max_Today.state
+    if (tempState instanceof QuantityType<?>) {
+        val tempMax = (tempState as QuantityType<Number>).toUnit("°C")
+        if (tempMax === null) {
+            logWarn("WeatherRule", "Nie można przeliczyć Weather_Temp_Max_Today na °C (obecny stan: {}).", tempState)
+        } else if (tempMax.doubleValue > 27.0) {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> 27°C). Zamykam rolety w grupie gWindowBlinds do 90%.", tempMax.doubleValue)
+            gWindowBlinds.sendCommand(90)
+        } else {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= 27°C). Rolety bez zmian.", tempMax.doubleValue)
         }
     } else {
-        logWarning("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", Weather_Temp_Max_Today.state)
+        logWarn("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", tempState)
     }
 end

@@ -26,7 +26,7 @@ The system has three components:
 - **Python 3** — main language for `psh-actor`
 - **paho-mqtt** — MQTT client library
 - **gpiozero** — GPIO abstraction (`LED`, `Button`, `DigitalOutputDevice`)
-- **OpenHAB** — home automation platform (runs on openHABian)
+- **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.1.4
 - **Mosquitto** — MQTT broker (local, unencrypted, port 1883)
 - **systemd** — service management for the actor daemon
 
