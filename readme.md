@@ -120,6 +120,40 @@ curl -s http://localhost:8080/rest/items/Weather_Temp_Max_Today | grep -o '"stat
 A `NULL` state alongside an `ONLINE` Thing almost always means the JSONPATH
 transformation is missing.
 
+## Fix JVM Timezone
+
+OpenHAB runs on the JVM, which has its own timezone setting independent of the OS.
+Without an explicit override the JVM may use UTC or CET (UTC+1), causing:
+
+- **`Time cron` rules to fire 1 hour late** — e.g. the 23:00 lights-off rule
+  triggers at midnight local time during summer.
+- **Log timestamps 1 hour behind real time** — `openhab.log` entries show 07:00
+  when the wall clock reads 08:00 (CEST = UTC+2).
+
+**Fix** — add the timezone flag to OpenHAB's JVM options:
+
+```bash
+sudo nano /etc/default/openhab
+```
+
+Find or add the `EXTRA_JAVA_OPTS` line:
+
+```
+EXTRA_JAVA_OPTS="-Duser.timezone=Europe/Warsaw"
+```
+
+Then restart OpenHAB:
+
+```bash
+sudo systemctl restart openhab
+```
+
+**Verify** — after restart, log timestamps should match local time:
+
+```bash
+sudo journalctl -u openhab -n 5
+```
+
 ## PkamSmartHome Actor installation
 
 1. Login to terminal as `pshactor`
