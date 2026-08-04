@@ -1,5 +1,5 @@
 val Double TEMP_INIT_CLOSING = 27.0
-val Double SUN_ELEVATION_OPENING = 10.0
+val Double SUN_ELEVATION_OPENING = 20.0
 
 // Notify current state on startup
 rule "Startup"
