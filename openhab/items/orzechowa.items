@@ -5,6 +5,8 @@ Group:Switch:AND(ON, OFF)   gNightLights   "Nocne światła"      <outdoorlight>
 Group:Switch:AND(ON, OFF)   gXmasLights    "Świąteczne światła" <outdoorlight>   (gLight) 
 Group:Switch:AND(ON, OFF)   gAwayLights    "Tryb nieobecność"   <light>          (gLight) 
 Group:Rollershutter         gWindowBlinds  "Wszystkie rolety"   <rollershutter>  (Home)
+Group:Rollershutter         gWindowBlindsSouth  "Rolety Południe"   <rollershutter>  (gWindowBlinds)
+Group:Rollershutter         gWindowBlindsWest  "Rolety Zachód"   <rollershutter>  (gWindowBlinds)
 
 // Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              
@@ -14,7 +16,7 @@ Group    Office             "Biuro"             <office>        (GF)
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
 Switch   Office_Lamp        "Biuro Lampa"       <light>         (Office, gLight)               {channel="tplinksmarthome:hs100:B87101:switch", homekit="Lighting"}
-Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
+Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gWindowBlindsSouth)        {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
 Switch   Office_Scene_Working "Scena Praca w biurze" <present>      (Office)                       {homekit="Switchable"}
 
 // Livingroom
@@ -24,7 +26,7 @@ Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLi
 Switch   Livingroom_2_3     "Salon 2/3"         <light>         (Livingroom, gLivingroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling23", homekit="Lighting"}
 Group:Switch:OR(ON, OFF)   gLivingroomCeilingLight   "Salon Sufit"     <light>   (Livingroom, gLight)  {homekit="Lighting"}
 Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLight, gAwayLights)      {channel="tplinksmarthome:hs100:B744EB:switch", homekit="Lighting"}
-Rollershutter Livingroom_WindowBlind "Salon Roleta" <rollershutter> (Livingroom, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3b2b1c:roller#control", homekit="WindowCovering"}
+Rollershutter Livingroom_WindowBlind "Salon Roleta" <rollershutter> (Livingroom, gWindowBlindsSouth)        {channel="shelly:shellyplus2pm-roller:28372f3b2b1c:roller#control", homekit="WindowCovering"}
 Switch   Livingroom_Scene_Kino "Scena Kino"         <present>      (Livingroom)                       {homekit="Switchable"}
 
 // Diningroom
@@ -41,7 +43,11 @@ Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)
 
 // Parents' bedroom
 Group    SypialniaRodzicow  "Sypialnia Rodziców" <bedroom>     (FF)                 
-Rollershutter SypialniaRodzicow_WindowBlind "Sypialnia Rodziców Roleta" <rollershutter> (SypialniaRodzicow, gWindowBlinds) {channel="shelly:shellyplus2pm-roller:e4b063e90074:roller#control", homekit="WindowCovering"}
+Rollershutter SypialniaRodzicow_WindowBlind "Sypialnia Rodziców Roleta" <rollershutter> (SypialniaRodzicow, gWindowBlindsWest) {channel="shelly:shellyplus2pm-roller:e4b063e90074:roller#control", homekit="WindowCovering"}
+
+// Tymon's room
+Group    Tymon            "Pokój Tymona"      <boy_3>       (FF)  
+Rollershutter Tymon_WindowBlind "Roleta" <rollershutter> (Tymon, gWindowBlindsSouth) {channel="shelly:shellyplus2pm-roller:28372f3389f8:roller#control", homekit="WindowCovering"}
 
 // Outdoor
 Group    Outdoor            "Outdoor"           <outdoorlight> (Home)

@@ -1,5 +1,6 @@
 val Double TEMP_INIT_CLOSING = 27.0
 val Double SUN_ELEVATION_OPENING = 20.0
+val Double SUN_ELEVATION_FULL_OPENING = 10.0
 
 // Notify current state on startup
 rule "Startup"
@@ -82,6 +83,8 @@ then
 end
 
 // Open blinds when sun is low and it was hot today
+// At SUN_ELEVATION_OPENING (20°): fully open South blinds, West blinds to position 20
+// At SUN_ELEVATION_FULL_OPENING (10°): fully open all blinds
 rule "Otwarcie rolet po upalnym dniu"
 when
     Item Sun_Elevation changed
@@ -92,13 +95,25 @@ then
         val prevElevationState = previousState
         val prevElevation = if (prevElevationState instanceof DecimalType) (prevElevationState as DecimalType).doubleValue else 999.0
 
-        if (elevation < SUN_ELEVATION_OPENING && prevElevation >= SUN_ELEVATION_OPENING && now.getHour >= 13) {
+        if (now.getHour >= 13) {
             val tempState = Weather_Temp_Max_Today.state
             if (tempState instanceof QuantityType<?>) {
                 val tempMax = (tempState as QuantityType<Number>).toUnit("°C")
                 if (tempMax !== null && tempMax.doubleValue > TEMP_INIT_CLOSING) {
-                    logInfo("WeatherRule", "Słońce nisko ({}° < {}°) i dziś było gorąco ({}°C > {}°C). Otwieram rolety w grupie gWindowBlinds.", elevation, SUN_ELEVATION_OPENING, tempMax.doubleValue, TEMP_INIT_CLOSING)
-                    gWindowBlinds.sendCommand(UP)
+
+                    // Stage 1: sun descends below 20° → open South blinds fully, West to 20
+                    if (elevation < SUN_ELEVATION_OPENING && prevElevation >= SUN_ELEVATION_OPENING) {
+                        logInfo("WeatherRule", "Słońce zeszło poniżej {}° (było {}°, dziś {}°C). Otwieram gWindowBlindsSouth do 0%, gWindowBlindsWest do 20%.", SUN_ELEVATION_OPENING, prevElevation, tempMax.doubleValue)
+                        gWindowBlindsSouth.sendCommand(0)
+                        gWindowBlindsWest.sendCommand(20)
+                    }
+
+                    // Stage 2: sun descends below 10° → fully open all blinds
+                    if (elevation < SUN_ELEVATION_FULL_OPENING && prevElevation >= SUN_ELEVATION_FULL_OPENING) {
+                        logInfo("WeatherRule", "Słońce zeszło poniżej {}° (było {}°, dziś {}°C). Otwieram wszystkie rolety gWindowBlinds do 0%.", SUN_ELEVATION_FULL_OPENING, prevElevation, tempMax.doubleValue)
+                        gWindowBlinds.sendCommand(0)
+                    }
+
                 }
             } else {
                 logWarn("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", tempState)
