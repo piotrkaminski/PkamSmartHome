@@ -42,6 +42,11 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Diningroom_2_3
     }
 
+    Frame label="Sypialnia Rodziców" {
+        Slider item=SypialniaRodzicow_WindowBlind
+        Switch item=SypialniaRodzicow_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+    }
+
     Frame label="Outdoor" {
         Switch item=Outdoor_Front_Xmas
         Switch item=Outdoor_Front

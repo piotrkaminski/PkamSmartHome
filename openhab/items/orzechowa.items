@@ -8,6 +8,8 @@ Group:Rollershutter         gWindowBlinds  "Wszystkie rolety"   <rollershutter> 
 
 // Ground Floor
 Group    GF                 "Parter"            <groundfloor>   (Home)              
+
+// Office
 Group    Office             "Biuro"             <office>        (GF)                
 Switch   Office_Light       "Biuro Sufit"       <light>         (Office, gLight)               {channel="mqtt:topic:pshActor1:pshActor1Thing:gfOfficeCeiling", homekit="Lighting"}
 Dimmer   Office_Biurko      "Biurko"            <light>         (Office, gLight)               {channel="tplinksmarthome:kl110:114AAE:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
@@ -15,7 +17,7 @@ Switch   Office_Lamp        "Biuro Lampa"       <light>         (Office, gLight)
 Rollershutter Office_WindowBlind "Biuro Roleta" <rollershutter> (Office, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3dac18:roller#control", homekit="WindowCovering"}
 Switch   Office_Scene_Working "Scena Praca w biurze" <present>      (Office)                       {homekit="Switchable"}
 
-
+// Livingroom
 Group    Livingroom         "Salon"             <video>         (GF)
 Switch   Livingroom_LedTV   "Led TV"            <light>         (Livingroom, gLight)           {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomLedTV", homekit="Lighting"}
 Switch   Livingroom_1_3     "Salon 1/3"         <light>         (Livingroom, gLivingroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfLivingroomCeiling13", homekit="Lighting"}
@@ -25,7 +27,7 @@ Switch   Livingroom_Lampa   "Lampa"             <light>         (Livingroom, gLi
 Rollershutter Livingroom_WindowBlind "Salon Roleta" <rollershutter> (Livingroom, gWindowBlinds)        {channel="shelly:shellyplus2pm-roller:28372f3b2b1c:roller#control", homekit="WindowCovering"}
 Switch   Livingroom_Scene_Kino "Scena Kino"         <present>      (Livingroom)                       {homekit="Switchable"}
 
-
+// Diningroom
 Group    Diningroom         "Jadalnia"          <presence>      (GF)
 Switch   Diningroom_1_3     "Jadalnia 1/3"      <light>         (Diningroom, gDiningroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling13", homekit="Lighting"}
 Switch   Diningroom_2_3     "Jadalnia 2/3"      <light>         (Diningroom, gDiningroomCeilingLight)  {channel="mqtt:topic:pshActor1:pshActor1Thing:gfDiningroomCeiling23", homekit="Lighting"}
@@ -33,8 +35,15 @@ Group:Switch:OR(ON, OFF)   gDiningroomCeilingLight   "Jadalnia Sufit"     <light
 
 // First Floor
 Group    FF                 "Piętro"            <firstfloor>   (Home)               
-Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)                 
 
+// Marysia's room
+Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)  
+
+// Parents' bedroom
+Group    SypialniaRodzicow  "Sypialnia Rodziców" <bedroom>     (FF)                 
+Rollershutter SypialniaRodzicow_WindowBlind "Sypialnia Rodziców Roleta" <rollershutter> (SypialniaRodzicow, gWindowBlinds) {channel="shelly:shellyplus2pm-roller:e4b063e90074:roller#control", homekit="WindowCovering"}
+
+// Outdoor
 Group    Outdoor            "Outdoor"           <outdoorlight> (Home)
 Switch   Outdoor_Front_Xmas "Front Lampki"      <light>       (Outdoor, gLight, gXmasLights)   {channel="tplinksmarthome:hs110:CCDBAD:switch", homekit="Lighting"}
 Dimmer   Outdoor_Front      "Front Kinkiet"     <light>       (Outdoor, gNightLights)    {channel="tplinksmarthome:kl110:083821:brightness", homekit="Lighting, Lighting.Brightness" [dimmerMode="filterBrightness100"]}
