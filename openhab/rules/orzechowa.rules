@@ -60,9 +60,9 @@ then
 end
 
 
-// Close blinds in Gabinet if today is hot (over 27°C)
+// Close blinds if today is hot (over 27°C)
 // Position convention: 0% = fully open (Otwórz), 100% = fully closed (Zamknij).
-rule "Zabezpieczenie przed upałem w Gabinecie"
+rule "Zabezpieczenie przed upałem ekspozycja Południowa"
 when
     Time cron "0 0 8 * * ?" // Codziennie o 08:00 rano
 then
@@ -73,7 +73,7 @@ then
             logWarn("WeatherRule", "Nie można przeliczyć Weather_Temp_Max_Today na °C (obecny stan: {}).", tempState)
         } else if (tempMax.doubleValue > TEMP_INIT_CLOSING) {
             logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> {}°C). Zamykam rolety w grupie gWindowBlinds do 90%.", tempMax.doubleValue, TEMP_INIT_CLOSING)
-            gWindowBlinds.sendCommand(60)
+            gWindowBlindsSouth.sendCommand(60)
         } else {
             logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= {}°C). Rolety bez zmian.", tempMax.doubleValue, TEMP_INIT_CLOSING)
         }
@@ -143,5 +143,25 @@ then
     Livingroom_LedTV.sendCommand(ON)
     Livingroom_Lampa.sendCommand(ON)
     Livingroom_Scene_Kino.postUpdate(OFF)
+end
+
+rule "Zabezpieczenie przed upałem ekspozycja Zachodnia"
+when
+    Time cron "0 0 15 * * ?" // Codziennie o 15:00
+then
+    val tempState = Weather_Temp_Max_Today.state
+    if (tempState instanceof QuantityType<?>) {
+        val tempMax = (tempState as QuantityType<Number>).toUnit("°C")
+        if (tempMax === null) {
+            logWarn("WeatherRule", "Nie można przeliczyć Weather_Temp_Max_Today na °C (obecny stan: {}).", tempState)
+        } else if (tempMax.doubleValue > TEMP_INIT_CLOSING) {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (> {}°C). Zamykam rolety w grupie gWindowBlindsWest.", tempMax.doubleValue, TEMP_INIT_CLOSING)
+            gWindowBlindsWest.sendCommand(60)
+        } else {
+            logInfo("WeatherRule", "Prognozowana temperatura na dziś to {}°C (<= {}°C). Rolety bez zmian.", tempMax.doubleValue, TEMP_INIT_CLOSING)
+        }
+    } else {
+        logWarn("WeatherRule", "Stan Weather_Temp_Max_Today nie jest typu QuantityType (obecny stan: {}).", tempState)
+    }
 end
 

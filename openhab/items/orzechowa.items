@@ -40,6 +40,7 @@ Group    FF                 "Piętro"            <firstfloor>   (Home)
 
 // Marysia's room
 Group    Marysia            "Pokój Marysi"      <girl_3>       (FF)  
+Rollershutter Marysia_WindowBlind "Roleta" <rollershutter> (Marysia, gWindowBlindsSouth) {channel="shelly:shellyplus2pm-roller:48f6ee900990:roller#control", homekit="WindowCovering"}
 
 // Parents' bedroom
 Group    SypialniaRodzicow  "Sypialnia Rodziców" <bedroom>     (FF)                 

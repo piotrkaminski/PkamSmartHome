@@ -47,6 +47,11 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=SypialniaRodzicow_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
     }
 
+    Frame label="Marysia" {
+        Slider item=Marysia_WindowBlind
+        Switch item=Marysia_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+    }
+
     Frame label="Tymon" {
         Slider item=Tymon_WindowBlind
         Switch item=Tymon_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
@@ -69,6 +74,7 @@ sitemap orzechowa label="Orzechowa" {
         Group item=Outdoor
         Group item=Taras
         Switch item=gLight
+        Switch item=gWindowBlinds mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
         Switch item=Away
     }
 }
