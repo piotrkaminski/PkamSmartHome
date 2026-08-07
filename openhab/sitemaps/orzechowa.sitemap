@@ -21,7 +21,7 @@ sitemap orzechowa label="Orzechowa" {
         Slider item=Office_Biurko
         Switch item=Office_Biurko
         Slider item=Office_WindowBlind
-        Switch item=Office_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=Office_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
     }
 
 
@@ -33,7 +33,7 @@ sitemap orzechowa label="Orzechowa" {
         Switch item=Livingroom_2_3
         Switch item=Livingroom_Lampa
         Slider item=Livingroom_WindowBlind
-        Switch item=Livingroom_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=Livingroom_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
     }
 
     Frame label="Jadalnia" {
@@ -44,17 +44,17 @@ sitemap orzechowa label="Orzechowa" {
 
     Frame label="Sypialnia Rodziców" {
         Slider item=SypialniaRodzicow_WindowBlind
-        Switch item=SypialniaRodzicow_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=SypialniaRodzicow_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
     }
 
     Frame label="Marysia" {
         Slider item=Marysia_WindowBlind
-        Switch item=Marysia_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=Marysia_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
     }
 
     Frame label="Tymon" {
         Slider item=Tymon_WindowBlind
-        Switch item=Tymon_WindowBlind mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=Tymon_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
     }
 
     Frame label="Outdoor" {
@@ -74,7 +74,7 @@ sitemap orzechowa label="Orzechowa" {
         Group item=Outdoor
         Group item=Taras
         Switch item=gLight
-        Switch item=gWindowBlinds mappings=[0="Otwórz", 50="Połowa", 100="Zamknij"]
+        Switch item=gWindowBlinds mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
         Switch item=Away
     }
 }
