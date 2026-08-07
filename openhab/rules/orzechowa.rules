@@ -23,8 +23,14 @@ then
         logInfo("Sunset Rule", "Turning on night lights")
         gNightLights.sendCommand(ON)
         if (Away.state == ON) {
-            logInfo("Sunset Rule", "Away mode active, turning on away lights")
-            gAwayLights.sendCommand(ON)
+            logInfo("Sunset Rule", "Away mode active, picking a random away light")
+            val awayLights = gAwayLights.members.toList
+            if (!awayLights.isEmpty) {
+                val rand = new java.util.Random()
+                val randomLight = awayLights.get(rand.nextInt(awayLights.size))
+                logInfo("Sunset Rule", "Turning on random away light: {}", randomLight.name)
+                randomLight.sendCommand(ON)
+            }
         }
     ])
 end
