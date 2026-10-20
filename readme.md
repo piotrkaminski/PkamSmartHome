@@ -1,5 +1,51 @@
 # Installation
 
+## Known-good versions
+
+This is the last combination confirmed working on the house Pi (recorded 2026-10-20,
+openHAB installed 2026-06-28). The Pi is a 32-bit Raspberry Pi 3 — newer openHAB,
+Java or OS releases may drop support for it, so when reinstalling, **start from these
+versions** and upgrade only after checking the openHAB release notes for 32-bit
+(`armhf` / ARMv7) and Java requirements.
+
+| Component | Version |
+|-----------|---------|
+| Hardware | Raspberry Pi 3 Model B Rev 1.2, 1 GB RAM |
+| Architecture | `armhf` (32-bit userland), kernel `6.18.34+rpt-rpi-v7` (`armv7l`) |
+| OS image | Raspberry Pi OS reference image 2025-12-04 → Raspbian GNU/Linux 13 (trixie) |
+| openHABian | branch `openHAB`, commit `7abab950` (2026-02-09) |
+| openHAB | `openhab` **5.1.4-1** + `openhab-addons` **5.1.4-1** (Release Build) |
+| Java | OpenJDK **21.0.10** (`openjdk-21-jre-headless 21.0.10+7-1~deb13u1+rpi1`, Client VM) |
+| Mosquitto | 2.0.21-1 |
+| Python | 3.13.5 |
+| Python packages | `paho-mqtt` 2.1.0, `gpiozero` 2.0.1 |
+
+JVM options in `/etc/default/openhab` that work on this 1 GB Pi:
+
+```
+EXTRA_JAVA_OPTS="-Xms192m -Xmx384m -XX:-TieredCompilation -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError -Dxtext.qn.interning=true -Duser.timezone=Europe/Warsaw"
+```
+
+**Installing this exact openHAB version** (if it is still in the openHAB apt
+repository) and preventing accidental upgrades:
+
+```bash
+sudo apt install openhab=5.1.4-1 openhab-addons=5.1.4-1
+sudo apt-mark hold openhab openhab-addons
+# later, to allow upgrades again:
+sudo apt-mark unhold openhab openhab-addons
+```
+
+Check what is actually installed:
+
+```bash
+dpkg-query -W -f='${Package} ${Version}\n' 'openhab*'
+curl -s http://localhost:8080/rest/ | grep -o '"version":"[^"]*"'
+java -version
+```
+
+Update this table after every successful upgrade or reinstall.
+
 ## Install openHabian with OpenHab
 
 1. Install latest stable version of openHABian on SD card using instruction https://www.openhab.org/docs/installation/openhabian.html
@@ -234,3 +280,65 @@ This step is needed when items, thing or configuration files are updated or adde
    ```
    tail -f /var/log/openhab/openhab.log
    ```
+
+# Recovery after SD card failure
+
+Symptoms seen on 2026-10-20: `mosquitto_pub`/`mosquitto_sub` crash with
+`Segmentation fault`, Python fails with `bad marshal data`, and `dpkg --verify`
+lists binaries with checksum mismatches (`??5??????`) and garbled path names
+(e.g. `/usr/sHare/amsa/...`). Random bit flips across unrelated packages mean the
+SD card (or power supply) is failing. Services already running keep working from
+memory, but **do not reboot or restart services** until the steps below are done.
+
+## 1. Diagnose (read-only)
+
+```bash
+dpkg --verify > /tmp/dpkg-verify.txt          # no output lines = all package files intact
+awk '$2!="c" && substr($1,3,1)=="5"' /tmp/dpkg-verify.txt   # changed non-config files
+sudo vcgencmd get_throttled                    # anything other than 0x0 = power problem
+```
+
+Expected (harmless) entries: changed files in `/var/lib/openhab/etc/` (openHAB
+rewrites them) and missing `/etc/openhab/*/readme.txt` (deleted by
+`install-config.sh`). Anything in `/usr/lib`, `/usr/share/openhab`, kernel modules
+or firmware is real corruption.
+
+## 2. Back up what is not in git
+
+Items, rules, sitemaps, MQTT Things and `config.json` are in this repo. Shelly and
+TP-Link Things, users and UI pages live only in the openHAB JSON database:
+
+```bash
+ssh -t pkam-pi 'sudo tar czf /tmp/pkam-backup.tgz /var/lib/openhab/jsondb /etc/openhab /etc/default/openhab /etc/mosquitto'
+scp pkam-pi:/tmp/pkam-backup.tgz ~/Desktop/
+```
+
+## 3. Replace the card (recommended)
+
+1. Flash a new, good-quality card (A1/A2 rated or "endurance") with the image in
+   [Known-good versions](#known-good-versions), and follow [Installation](#installation).
+2. Install the same openHAB version and hold it (see Known-good versions).
+3. Before running `install-config.sh`, restore the JSON database with openHAB stopped:
+   ```bash
+   sudo systemctl stop openhab
+   sudo tar xzf pkam-backup.tgz -C / var/lib/openhab/jsondb
+   sudo chown -R openhab:openhab /var/lib/openhab/jsondb
+   sudo systemctl start openhab
+   ```
+4. Re-apply the JVM options from `/etc/default/openhab` in the backup.
+5. Set the OS timezone: `sudo timedatectl set-timezone Europe/Warsaw`.
+6. Check power: `sudo vcgencmd get_throttled` must print `throttled=0x0`. If not,
+   replace the power supply before the new card gets corrupted too.
+
+## 4. Stopgap (only if the card cannot be replaced yet)
+
+After the backup in step 2, reinstall the damaged packages and drop corrupted
+Python caches:
+
+```bash
+sudo apt install --reinstall libmosquitto1 mosquitto-clients python3-dnspython openhab openhab-addons
+sudo find /usr/lib/python3/dist-packages -name '*.pyc' -delete
+```
+
+Re-run `dpkg --verify` afterwards. Expect new corruption to appear while the card
+is still failing.
