@@ -119,6 +119,34 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
   backs them up to `openhab/backup/` first)
 - Logs: `psh-actor/logs/psh-actor.log` (actor), `/var/log/openhab/openhab.log` (OpenHAB)
 
+## Access to the Pi
+
+- **SSH**: `ssh pkam-pi` — host alias in `~/.ssh/config` on the dev machine, user
+  `pshactor`, key auth only. If `ssh pkam-pi true` fails, stop and tell the user;
+  never try other hosts, users or passwords.
+- **OpenHAB REST**: `http://localhost:8080/rest` from the Pi; API token in
+  `~/.openhab-token` on the Pi. Never copy the token into the repo or into logs.
+- **Deploying**: only through the `/pkam-deploy` skill
+  (`.agents/skills/pkam-deploy/SKILL.md`), and only when the user asks.
+- **`sudo`**: if it prompts for a password, ask the user to run that line
+  themselves with `! ssh -t pkam-pi sudo ...`.
+
+| Allowed without asking (read-only) | Needs explicit user confirmation |
+|------------------------------------|----------------------------------|
+| `systemctl status` / `is-active`, `journalctl` | `git pull` / `git checkout` on the Pi |
+| Reading `psh-actor/logs/` and `/var/log/openhab/openhab.log` | `systemctl restart` / `stop` / `start` of any service |
+| `git log`, `git status`, `git diff` on the Pi | `install-environment.sh`, `install-config.sh`, `install-service.sh` |
+| REST `GET` requests to OpenHAB | REST `POST` / `PUT` / `DELETE` (commands to items, rule changes) |
+| `mosquitto_sub`; `NOTIFY_CURRENT_STATE` to `/Pi1/In/Admin` | Any other `mosquitto_pub` (switches lights, moves blinds, `RESET`) |
+| `pinctrl get` / `raspi-gpio get` | `reboot`, package installs, any change to files on the Pi |
+
+> **Restarting `psh-actor` turns OFF every GPIO light** — `Main` calls
+> `rooms_service.reset()` on startup. Before asking to restart, tell the user
+> which lights are currently ON (get them with `NOTIFY_CURRENT_STATE`).
+
+Never edit files on the Pi by hand and never `git push` from the Pi — all changes
+go through this repo.
+
 ## Domain Reference
 
 Detailed domain knowledge (current points, groups, rules, devices, workflows for
