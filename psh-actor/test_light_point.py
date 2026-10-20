@@ -57,9 +57,10 @@ class LightPointTest(TestCase):
             comm_service=None)
         point.led = led
 
-        point.updateStatus(message="ON")
+        point.updateStatus(message="OFF")
 
-        led.on.assert_called()
+        led.off.assert_called()
+        led.on.assert_not_called()
 
     def test_updateStatus_Any(self):
         led = Mock()

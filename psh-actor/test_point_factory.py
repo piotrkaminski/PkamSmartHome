@@ -2,10 +2,14 @@ from point_factory import PointFactory
 from point import Point
 from unittest import TestCase
 from unittest.mock import Mock
+from gpiozero import Device
+from gpiozero.pins.mock import MockFactory
 
 class PointFactoryTest(TestCase):
 
     def setUp(self):
+        # Fresh mock pin factory per test, so pins reserved by one test do not leak into another
+        Device.pin_factory = MockFactory()
         self.point_factory = PointFactory()
 
     def test_create_point_success(self):

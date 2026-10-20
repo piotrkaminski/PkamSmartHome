@@ -86,5 +86,5 @@ class HubCommunicationServiceTest(TestCase):
         mqtt_client = Mock()
         service.client = mqtt_client
 
-        service.on_connect(client=Mock(), userdata=None, flags=None, rc=None)
+        service.on_connect(client=Mock(), userdata=None, flags=None, reason_code=None, properties=None)
         mqtt_client.subscribe.assert_called_with("/ClientE/In/#")

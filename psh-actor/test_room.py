@@ -2,8 +2,14 @@ from room import Room
 from point import Point
 from unittest import TestCase
 from unittest.mock import Mock
+from gpiozero import Device
+from gpiozero.pins.mock import MockFactory
 
 class RoomsTest(TestCase):
+
+    def setUp(self):
+        # Fresh mock pin factory per test, so pins reserved by one test do not leak into another
+        Device.pin_factory = MockFactory()
 
     def test_update_status_sucess(self):
         room = Room("Room1")
