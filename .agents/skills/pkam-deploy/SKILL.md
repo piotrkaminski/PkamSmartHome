@@ -6,7 +6,7 @@ description: >
   rules). Use only when the user explicitly asks to deploy, roll out, or verify
   a deployment on the Pi.
 disable-model-invocation: true
-argument-hint: "[git ref to deploy, default: master] [--verify-only]"
+argument-hint: "[branch to deploy, default: the Pi's current branch] [--verify-only]"
 ---
 
 # PkamSmartHome — Deploy & Verify
@@ -23,15 +23,42 @@ rollback offer.
 | Repo on Pi | `/home/pshactor/PkamSmartHome` |
 | Actor name / topic root | `Pi1` → `/Pi1/In/...`, `/Pi1/Out/...` |
 | OpenHAB REST | `http://localhost:8080/rest`, token in `~/.openhab-token` on the Pi (never in the repo). Sitemaps and item states work without it; Things and rules return 401 without it |
-| Default ref | `master` — deploying any other branch needs explicit user OK |
+| Default ref | The branch currently checked out on the Pi (`PREV_BRANCH`, any branch is fine). If the Pi is detached, the user must name a branch. Deploying a branch other than `PREV_BRANCH` switches the Pi to it — call that out in the Step 3 plan |
 
 Every remote command runs as `ssh pkam-pi '<cmd>'`. If `ssh pkam-pi true` fails,
 stop and tell the user — never try other hosts, users or passwords.
 
+## Prerequisites
+
+The skill does **not** set up the Pi. It expects a Pi installed by `readme.md`
+→ Installation, plus the access in readme → "Prepare the Pi for /pkam-deploy".
+Step 0 checks all of this read-only.
+
+**Required** (if any is missing, stop and point the user to the readme):
+
+| # | Where | Must be true |
+|---|-------|--------------|
+| R1 | dev machine | `ssh -o BatchMode=yes pkam-pi true` works: `Host pkam-pi` in `~/.ssh/config` (user `pshactor`), dev public key in the Pi's `~pshactor/.ssh/authorized_keys`, Pi host key already accepted |
+| R2 | dev machine | Repo cloned with push access to `origin`; `psh-actor/.venv` built from `requirements.txt` (for Step 1 tests) |
+| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 with every add-on in readme "Required openHAB Add-ons", Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
+| R4 | Pi | User `pshactor` in groups `sudo` and `gpio` |
+| R5 | Pi | Repo at `/home/pshactor/PkamSmartHome`, `origin` = `git@github.com:piotrkaminski/PkamSmartHome.git`, `pshactor` can fetch without prompts (SSH key on GitHub, `github.com` in `known_hosts`), clean working tree. Any branch is fine if it tracks an `origin` branch and has no commits that are not on origin; a detached HEAD must be a commit that exists on origin |
+| R6 | Pi | `install-environment.sh` run once (`paho-mqtt` + `gpiozero` importable by system `python3`, `psh-actor/logs/` exists) |
+| R7 | Pi | `install-service.sh` and `install-config.sh` run once; `psh-actor` enabled + active; `openhab`, `mosquitto` active; `/rest/sitemaps/orzechowa` returns 200 |
+
+**Optional** (if missing, the deploy still runs, with less coverage):
+
+| # | Must be true | If missing |
+|---|--------------|-----------|
+| O1 | `~/.openhab-token` on the Pi, mode 600, valid API token | "Things online" and "Rules loaded" checks are SKIPPED |
+| O2 | `pshactor` can read `/var/log/openhab/openhab.log` | "Models loaded" check is SKIPPED |
+| O3 | Passwordless `sudo` | User runs each `sudo` line themselves with `! ssh -t pkam-pi ...` (this is the normal case and the safer one) |
+| O4 | OS timezone and the single JVM `-Duser.timezone` are both `Europe/Warsaw` | `T0` and openHAB log timestamps disagree; log windows may be off by an hour |
+
 ## Modes
 
-- `/pkam-deploy <ref>` — full flow, Steps 1–7.
-- `/pkam-deploy --verify-only` — no deploy: Step 2 (snapshot + integrity), then
+- `/pkam-deploy <ref>` — full flow, Steps 0–7.
+- `/pkam-deploy --verify-only` — no deploy: Step 0, Step 2 (snapshot + integrity), then
   every check in Step 5 against what is running now, then Step 6. Checks that only
   make sense right after a deploy (e.g. `Started cleanly` when the actor has been
   up for weeks and its startup log has rotated) are SKIPPED with the reason.
@@ -52,6 +79,20 @@ stop and tell the user — never try other hosts, users or passwords.
    `config.json` pins (see AGENTS.md safety rules).
 6. Never switch a light or move a blind for testing without asking first.
 
+## Step 0 — Readiness check (read-only)
+
+```bash
+ssh -o BatchMode=yes pkam-pi 'bash -s' < .agents/skills/pkam-deploy/check-pi-ready.sh
+```
+
+- Exit code 0 / `READY` = all required checks passed. Any `FAIL` = **stop**, list
+  the failed checks, and point to the matching R-row above and readme →
+  "Prepare the Pi for /pkam-deploy". Do not try to fix the Pi yourself.
+- Carry each `WARN` into the plan (Step 3) and the report (Step 6) so the user
+  knows which checks will be SKIPPED and why.
+- If `ssh` itself fails (R1), stop and tell the user. Never try other hosts,
+  users or passwords.
+
 ## Step 1 — Local preflight (on this machine)
 
 - `git status` clean, target ref pushed to `origin`.
@@ -69,7 +110,9 @@ ssh pkam-pi '
   date "+%F %T %Z"'
 ```
 
-- Record `PREV_SHA` (needed for rollback) and the deploy start time `T0`.
+- Record `PREV_SHA` and `PREV_BRANCH` (empty if detached; both needed for
+  rollback) and the deploy start time `T0`. With no ref given, `<ref>` =
+  `PREV_BRANCH`.
 - If the Pi working tree is dirty, stop and show the user the changes.
 - Capture current light states (non-invasive):
 
@@ -115,6 +158,8 @@ Map changed paths to actions:
 
 Present to the user: commits being deployed (`git log --oneline PREV_SHA..origin/<ref>`),
 the action list, lights that will go OFF, and the rollback point `PREV_SHA`.
+If `<ref>` ≠ `PREV_BRANCH`, say plainly: "the Pi switches from `PREV_BRANCH` to
+`<ref>`".
 Wait for an explicit yes.
 
 ## Step 4 — Deploy
@@ -234,5 +279,5 @@ ssh -t pkam-pi 'sudo systemctl restart psh-actor'                         # if a
 
 Re-installing from the checked-out `PREV_SHA` is safer than restoring
 `openhab/backup/`, which was just overwritten. Afterwards re-run Step 5 and report.
-Leave the Pi on detached `PREV_SHA` and tell the user to return it to `master`
-once the fix is merged.
+Leave the Pi on detached `PREV_SHA`. Tell the user to check out a branch again
+once the fix is merged (`PREV_BRANCH`, or whichever branch they want running).

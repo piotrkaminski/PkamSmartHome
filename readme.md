@@ -229,6 +229,53 @@ sudo journalctl -u openhab -n 5
     sudo systemctl status psh-actor
     ```
 
+## Prepare the Pi for /pkam-deploy
+
+The `/pkam-deploy` agent skill (`.agents/skills/pkam-deploy/SKILL.md`) deploys
+and verifies over SSH. It needs everything above done first, plus the steps below.
+Check the result at any time with this read-only script (from the dev machine,
+repo root):
+
+```bash
+ssh -o BatchMode=yes pkam-pi 'bash -s' < .agents/skills/pkam-deploy/check-pi-ready.sh
+```
+
+### Required
+
+1. **SSH from the dev machine as `pshactor`, key-only.** In `~/.ssh/config` on the dev machine:
+   ```
+   Host pkam-pi
+       HostName <pi-ip>
+       User pshactor
+       IdentityFile ~/.ssh/id_rsa
+       IdentitiesOnly yes
+   ```
+   Then `ssh-copy-id pkam-pi` and check with `ssh -o BatchMode=yes pkam-pi true`
+   (it must not ask for anything).
+1. **GitHub access for `pshactor` on the Pi** (`git clone git@github.com:...` from
+   the actor installation above). Check with `ssh pkam-pi 'cd ~/PkamSmartHome && git ls-remote origin HEAD'`.
+   It must not prompt for a host key or a passphrase.
+1. **The Pi repo has a clean working tree.** It can be on any branch, as long as
+   that branch tracks an `origin` branch and has no commits of its own (never
+   commit or edit files on the Pi). `/pkam-deploy` with no argument deploys
+   whichever branch is checked out.
+
+### Optional
+
+1. **OpenHAB API token**, which enables the Things and rules checks. In the Main UI
+   (`http://<pi-ip>:8080`), click your user name at the bottom left, then
+   *Create new API token*. Store it on the Pi without pasting it anywhere else:
+   ```bash
+   ssh -t pkam-pi 'umask 077; read -rsp "Token: " T; printf %s "$T" > ~/.openhab-token; echo'
+   ```
+1. **Timezone**: `sudo timedatectl set-timezone Europe/Warsaw`, and keep exactly
+   one `-Duser.timezone=Europe/Warsaw` in `EXTRA_JAVA_OPTS` in `/etc/default/openhab`
+   (see [Fix JVM Timezone](#fix-jvm-timezone)).
+1. **sudo** may keep asking for a password, which is the recommended setup. The
+   agent then asks you to run each `sudo` line yourself. Passwordless sudo for
+   `install-config.sh` / `install-service.sh` would amount to root for anything
+   pushed to the repo.
+
 ## Add auto-discovered Things
 1. Login into admin console http://your-ip:8080
 1. Go to Settings -> Things -> Inbox

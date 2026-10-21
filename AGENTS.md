@@ -127,7 +127,9 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 - **OpenHAB REST**: `http://localhost:8080/rest` from the Pi; API token in
   `~/.openhab-token` on the Pi. Never copy the token into the repo or into logs.
 - **Deploying**: only through the `/pkam-deploy` skill
-  (`.agents/skills/pkam-deploy/SKILL.md`), and only when the user asks.
+  (`.agents/skills/pkam-deploy/SKILL.md`), and only when the user asks. What
+  the Pi must have first is under "Prerequisites" in that skill; check it with
+  `.agents/skills/pkam-deploy/check-pi-ready.sh` (read-only).
 - **`sudo`**: if it prompts for a password, ask the user to run that line
   themselves with `! ssh -t pkam-pi sudo ...`.
 
