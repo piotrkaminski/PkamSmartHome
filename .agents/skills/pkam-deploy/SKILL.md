@@ -3,10 +3,11 @@ name: pkam-deploy
 description: >
   Deploy PkamSmartHome changes to the Raspberry Pi over SSH and verify the
   deployment worked (psh-actor service, MQTT round trip, OpenHAB Things/Items/
-  rules). Use only when the user explicitly asks to deploy, roll out, or verify
-  a deployment on the Pi.
+  rules), or set up a freshly installed openHABian Pi (--setup). Use only when
+  the user explicitly asks to deploy, roll out, verify a deployment, or set up
+  the Pi.
 disable-model-invocation: true
-argument-hint: "[branch to deploy, default: the Pi's current branch] [--verify-only]"
+argument-hint: "[branch to deploy, default: the Pi's current branch] [--verify-only | --setup]"
 ---
 
 # PkamSmartHome — Deploy & Verify
@@ -30,8 +31,8 @@ stop and tell the user — never try other hosts, users or passwords.
 
 ## Prerequisites
 
-The skill does **not** set up the Pi. It expects a Pi installed by `readme.md`
-→ Installation, plus the access in readme → "Prepare the Pi for /pkam-deploy".
+A normal deploy expects a Pi set up by `--setup` (see `setup.md`), or by hand
+following `readme.md` → Installation and → "Prepare the Pi for /pkam-deploy".
 Step 0 checks all of this read-only.
 
 **Required** (if any is missing, stop and point the user to the readme):
@@ -58,6 +59,10 @@ Step 0 checks all of this read-only.
 ## Modes
 
 - `/pkam-deploy <ref>` — full flow, Steps 0–7.
+- `/pkam-deploy --setup` — fresh openHABian Pi to deploy-ready, over SSH as
+  `openhabian` (alias `pkam-pi-setup`). Follow `setup.md` in this directory; it
+  ends with `--verify-only`. It needs the user for passwords, the GitHub deploy key
+  and the openHAB admin account, and it never takes them through the chat.
 - `/pkam-deploy --verify-only` — no deploy: Step 0, Step 2 (snapshot + integrity), then
   every check in Step 5 against what is running now, then Step 6. Checks that only
   make sense right after a deploy (e.g. `Started cleanly` when the actor has been

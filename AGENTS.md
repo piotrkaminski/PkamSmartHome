@@ -126,6 +126,10 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 - **SSH**: `ssh pkam-pi` — host alias in `~/.ssh/config` on the dev machine, user
   `pshactor`, key auth only. If `ssh pkam-pi true` fails, stop and tell the user;
   never try other hosts, users or passwords.
+- **Setup SSH**: `ssh pkam-pi-setup` — same Pi, user `openhabian`, key auth only.
+  Used only by `/pkam-deploy --setup` (`.agents/skills/pkam-deploy/setup.md`).
+  There, root is limited to `sudo -n /usr/local/sbin/pkam-setup <step>`, which the
+  setup removes at the end. Never bypass a changed SSH host key; the user confirms it.
 - **OpenHAB REST**: `http://localhost:8080/rest` from the Pi; API token in
   `~/.openhab-token` on the Pi. Never copy the token into the repo or into logs.
 - **Deploying**: only through the `/pkam-deploy` skill
@@ -143,6 +147,7 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 | REST `GET` requests to OpenHAB | REST `POST` / `PUT` / `DELETE` (commands to items, rule changes) |
 | `mosquitto_sub`; `NOTIFY_CURRENT_STATE` to `/Pi1/In/Admin` | Any other `mosquitto_pub` (switches lights, moves blinds, `RESET`) |
 | `pinctrl get` / `raspi-gpio get` | `reboot`, package installs, any change to files on the Pi |
+| `sudo -n /usr/local/sbin/pkam-setup status` (setup only) | Every other `pkam-setup` step (one confirmation of the setup plan per phase) |
 
 > **Restarting `psh-actor` turns OFF every GPIO light** — `Main` calls
 > `rooms_service.reset()` on startup. Before asking to restart, tell the user

@@ -234,6 +234,12 @@ sudo journalctl -u openhab -n 5
 
 ## Prepare the Pi for /pkam-deploy
 
+> **Shortcut**: after openHABian's first boot, give the agent key access as
+> `openhabian` and run `/pkam-deploy --setup`. It runs every step from Mosquitto
+> to the actor service (`.agents/skills/pkam-deploy/setup.md`), repairs a failed
+> Java or openHAB install, and asks you for passwords, the GitHub deploy key and
+> the openHAB admin account. The manual steps below do the same by hand.
+
 The `/pkam-deploy` agent skill (`.agents/skills/pkam-deploy/SKILL.md`) deploys
 and verifies over SSH. It needs everything above done first, plus the steps below.
 Check the result at any time with this read-only script (from the dev machine,
