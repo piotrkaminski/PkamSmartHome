@@ -7,8 +7,9 @@ description: >
   service, systemd service management, or home automation workflows.
   Trigger on: 'smart home', 'GPIO', 'MQTT', 'OpenHAB', 'psh-actor',
   'light point', 'blind point', 'window blind', 'rollershutter',
-  'room configuration', 'openHABian', 'HomeKit', 'WindowCovering',
-  'TP-Link', 'Mosquitto', 'Astro binding', 'systemd service'.
+  'room configuration', 'openHABian',
+  'TP-Link', 'Shelly', 'Open-Meteo', 'weather rule', 'Mosquitto',
+  'Astro binding', 'systemd service'.
 ---
 
 # PkamSmartHome — Domain Knowledge
@@ -19,7 +20,7 @@ description: >
 
 ```
 ┌─────────────┐     GPIO      ┌───────────┐    MQTT     ┌──────────┐
-│  Physical   │──────────────▶│           │────────────▶│          │──▶ HomeKit
+│  Physical   │──────────────▶│           │────────────▶│          │
 │  Buttons    │               │ psh-actor │             │ OpenHAB  │──▶ BasicUI
 │             │◀──────────────│ (Python)  │◀────────────│          │──▶ Watch UI
 │  Relays     │     GPIO      │           │    MQTT     │          │
@@ -28,17 +29,34 @@ description: >
                               config.json              orzechowa.*
                               logging.conf             (things/items/
                                                         rules/sitemaps)
+
+┌─────────────────────┐   Wi-Fi (Shelly binding)    ┌──────────┐
+│ Shelly Plus 2PM     │◀───────────────────────────▶│          │
+│ (all window blinds) │                             │          │
+├─────────────────────┤   Wi-Fi (TP-Link binding)   │ OpenHAB  │
+│ TP-Link plugs/dimm. │◀───────────────────────────▶│          │
+├─────────────────────┤   HTTPS (HTTP + JSONPATH)   │          │
+│ Open-Meteo forecast │────────────────────────────▶│          │
+└─────────────────────┘                             └──────────┘
 ```
+
+> [!IMPORTANT]
+> All window blinds in the house are **Shelly Plus 2PM** roller controllers driven
+> directly by OpenHAB. `psh-actor` currently controls **lights only**. The
+> `BlindPoint` class (GPIO-wired blinds) exists and is tested, but no GPIO blind is
+> configured in `config.json`.
 
 ### Component Responsibilities
 
 | Component | Runs On | Manages |
 |-----------|---------|---------|
 | **psh-actor** | Raspberry Pi (systemd) | GPIO read/write, MQTT pub/sub, button debounce |
-| **OpenHAB** | Raspberry Pi (openHABian) | Automation rules, UI, HomeKit bridge, device discovery |
+| **OpenHAB** | Raspberry Pi (openHABian) | Automation rules, UI, device discovery |
 | **Mosquitto** | Raspberry Pi (systemd) | MQTT message broker (localhost:1883) |
 | **TP-Link Smart Home Binding** | OpenHAB | Wi-Fi smart plugs and dimmers (HS100, HS110, KL110) |
-| **Astro Binding** | OpenHAB | Sunrise/sunset times for automation triggers |
+| **Shelly Binding** | OpenHAB | All window blinds (Shelly Plus 2PM in roller mode) |
+| **HTTP Binding + JSONPATH** | OpenHAB | Open-Meteo daily forecast (`http:url:openmeteo`) for heat-protection rules |
+| **Astro Binding** | OpenHAB | Sunrise/sunset times and sun elevation for automation triggers |
 
 ---
 
@@ -72,7 +90,7 @@ All MQTT topics follow this structure:
 | Turn ON | `ON` |
 | Turn OFF | `OFF` |
 
-### Blind Point Commands
+### Blind Point Commands (GPIO `BlindPoint` — not currently deployed)
 
 | Command | Payload | Effect |
 |---------|---------|--------|
@@ -81,8 +99,8 @@ All MQTT topics follow this structure:
 | Stop | `STOP` | Stop any movement |
 | Go to position | `0`–`100` | Move to target percentage (0=fully open, 100=fully closed) |
 
-Predefined positions: `0` (fully open), `50` (half), `67` (2/3 closed), `100` (fully closed).
-State is published as an integer percentage (e.g., `0`, `50`, `67`, `100`).
+State is published as an integer percentage (e.g., `0`, `30`, `50`, `100`).
+The same 0 = open / 100 = closed convention is used by the Shelly blinds in OpenHAB.
 
 ### Wildcard Subscription
 
@@ -143,15 +161,29 @@ The actor configuration lives at `psh-actor/config/config.json`:
 | Marysia | Ceiling13 | 12 | 16 | `/Marysia/Ceiling13` |
 | Marysia | Ceiling23 | 20 | 21 | `/Marysia/Ceiling23` |
 
-### Current Room/Point Layout — Blinds
-
-| Room | Point | CtlUp | CtlDown | BtnUp | BtnDown | Travel (s) | MQTT Topic Suffix |
-|------|-------|-------|---------|-------|---------|------------|-------------------|
-| Office | WindowBlind | TBD | TBD | TBD | TBD | 25.0 | `/Office/WindowBlind` |
-
 > [!WARNING]
-> The Office WindowBlind GPIO pins are set to `0` (placeholder). They must be
-> updated with actual BCM pin numbers matching the physical wiring before deployment.
+> The two **Marysia** ceiling lights exist in `config.json` but have **no** MQTT
+> channel in `orzechowa.things` and no Item/Sitemap entry. They work from the wall
+> button only. Ask the user before wiring them into OpenHAB.
+
+### Current Room/Point Layout — GPIO Blinds
+
+None. `config.json` defines no `Blind` points. `config-example.json` contains an
+example `Office/WindowBlind` with pins 13/19/23/24 — these are **example values,
+not real wiring**; never copy them into `config.json`.
+
+### Current Window Blinds (Shelly, OpenHAB-native)
+
+| Item | Room | Shelly Thing (device ID) | Exposure group |
+|------|------|--------------------------|----------------|
+| `Office_WindowBlind` | Office | `shelly:shellyplus2pm-roller:28372f3dac18` | `gWindowBlindsSouth` |
+| `Livingroom_WindowBlind` | Livingroom | `shelly:shellyplus2pm-roller:28372f3b2b1c` | `gWindowBlindsSouth` |
+| `Marysia_WindowBlind` | Marysia | `shelly:shellyplus2pm-roller:48f6ee900990` | `gWindowBlindsSouth` |
+| `Tymon_WindowBlind` | Tymon | `shelly:shellyplus2pm-roller:28372f3389f8` | `gWindowBlindsSouth` |
+| `SypialniaRodzicow_WindowBlind` | Parents' bedroom | `shelly:shellyplus2pm-roller:e4b063e90074` | `gWindowBlindsWest` |
+
+Each item links to channel `<thing>:roller#control`. Shelly Things were added
+through the OpenHAB UI Inbox, so they are **not** in `orzechowa.things`.
 
 > [!CAUTION]
 > GPIO pin numbers are BCM (Broadcom) numbering. They map to physical wiring.
@@ -225,7 +257,7 @@ openhab/
 ├── things/
 │   └── orzechowa.things  # MQTT bridge, NTP, Astro bindings
 ├── items/
-│   └── orzechowa.items   # All controllable items with HomeKit tags
+│   └── orzechowa.items   # All controllable items
 ├── rules/
 │   └── orzechowa.rules   # Automation rules (sunset, sunrise, Xmas)
 └── sitemaps/
@@ -245,7 +277,7 @@ Type switch : channelId [
 ]
 ```
 
-MQTT-controlled **blinds** use `Type rollershutter`:
+GPIO **blinds** (if ever deployed through `psh-actor`) would use `Type rollershutter`:
 
 ```
 Type rollershutter : channelId [
@@ -260,42 +292,65 @@ Type rollershutter : channelId [
 Light items in `orzechowa.items`:
 
 ```
-Switch  ItemName  "Label"  <icon>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId", homekit="Lighting"}
+Switch  ItemName  "Label"  <icon>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId"}
 ```
 
-Blind items:
+Blind items (Shelly — current pattern):
 
 ```
-Rollershutter  ItemName  "Label"  <rollershutter>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId", homekit="WindowCovering"}
+Rollershutter  Room_WindowBlind  "Roleta"  <rollershutter>  (Room, gWindowBlindsSouth)  {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control"}
 ```
+
+Every blind must be in exactly one exposure group (`gWindowBlindsSouth` or
+`gWindowBlindsWest`), otherwise the heat-protection rules will not move it.
 
 Blind sitemap controls (slider + preset buttons):
 
 ```
-Slider item=Room_Blind
-Switch item=Room_Blind mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]
+Slider item=Room_WindowBlind
+Switch item=Room_WindowBlind mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]
 ```
 
 ### Groups
 
-Groups with aggregation functions:
-- `Group:Switch:AND(ON, OFF)` — all-on / all-off semantics (lights)
-- `Group:Switch:OR(ON, OFF)` — any-on semantics (ceiling light groups)
-- `Group gBlind` — all blinds group (no aggregation function)
+| Group | Type | Members / purpose |
+|-------|------|-------------------|
+| `gLight` | `Switch:AND(ON, OFF)` | All lights |
+| `gNightLights` | `Switch:AND(ON, OFF)` | Turned on 30 min after sunset (`Outdoor_Front`) |
+| `gXmasLights` | `Switch:AND(ON, OFF)` | Christmas lights (`Outdoor_Front_Xmas`; note `Taras_Xmas` is **not** a member) |
+| `gAwayLights` | `Switch:AND(ON, OFF)` | Candidates for the random Away-mode light (`Office_Light`, `Livingroom_1_3`, `Livingroom_Lampa`, `Diningroom_1_3`) |
+| `gLivingroomCeilingLight`, `gDiningroomCeilingLight` | `Switch:OR(ON, OFF)` | Any-on ceiling halves (1/3 + 2/3) |
+| `gTaras_Light` | `Dimmer` | Terrace wall lamps |
+| `gWindowBlinds` | `Rollershutter` | All blinds (parent of the two below) |
+| `gWindowBlindsSouth` | `Rollershutter` | South-exposed blinds |
+| `gWindowBlindsWest` | `Rollershutter` | West-exposed blinds |
 
 ### Automation Rules
 
+Constants at the top of `orzechowa.rules`: `TEMP_INIT_CLOSING = 27.0` °C,
+`SUN_ELEVATION_OPENING = 20.0`°, `SUN_ELEVATION_FULL_OPENING = 10.0`°.
+
 | Rule | Trigger | Action |
 |------|---------|--------|
-| Startup | System started | Sends `NOTIFY_CURRENT_STATE` to actor via MQTT |
-| Night lights ON | Sunset + 30 min | Turns on `gNightLights`; also `gAwayLights` if Away mode is ON |
-| Xmas lights ON | 16:00 daily (Dec 6–31, Jan 1–15) | Turns off night lights, turns on `gXmasLights` |
-| Lights OFF | 23:00 daily | Turns off all night, Xmas, and away lights |
-| Sunrise OFF | Sunrise event | Turns off night and Xmas lights |
+| `Startup` | System started | Publishes `NOTIFY_CURRENT_STATE` to `/Pi1/In/Admin` |
+| `Start night lights on sunset` | Sunset + 30 min | Turns on `gNightLights`; if `Away` is ON, turns on **one random** member of `gAwayLights` |
+| `Switch on Xmas lights` | 16:00 Dec 6–31, 16:15 Jan 1–15 | Turns off night lights, turns on `gXmasLights` |
+| `Off night lights` | 23:00 daily | Turns off night, Xmas and away lights |
+| `Switch off night lights on sunrise` | Sunrise event | Turns off night and Xmas lights |
+| `Zabezpieczenie przed upałem ekspozycja Południowa` | 08:00 daily | If today's forecast max > 27 °C → `gWindowBlindsSouth` to 60 |
+| `Zabezpieczenie przed upałem ekspozycja Zachodnia` | 15:00 daily | If today's forecast max > 27 °C → `gWindowBlindsWest` to 60 |
+| `Otwarcie rolet po upalnym dniu` | `Sun_Elevation` changed (after 13:00, hot day only) | Crossing below 20° → South to 0, West to 20; crossing below 10° → all blinds to 0 |
+| `Scena Praca w biurze` | `Office_Scene_Working` command ON | Office ceiling OFF, desk lamp ON, resets scene switch |
+| `Scena Kino` | `Livingroom_Scene_Kino` command ON | Livingroom ceiling OFF, LED TV + floor lamp ON, resets scene switch |
+
+> [!NOTE]
+> Rules use `Time cron`, which depends on the JVM timezone. See "Fix JVM Timezone"
+> in `readme.md` — without it, cron rules fire an hour off.
 
 ### Non-MQTT Devices
 
-These are controlled directly by OpenHAB via TP-Link binding (Wi-Fi):
+Blinds are controlled by OpenHAB through the Shelly binding (see the blinds table
+above). These lamps and plugs are controlled through the TP-Link binding (Wi-Fi):
 
 | Item | Device | Type |
 |------|--------|------|
@@ -306,6 +361,16 @@ These are controlled directly by OpenHAB via TP-Link binding (Wi-Fi):
 | `Outdoor_Front` | KL110 dimmer | Front wall lamp |
 | `Taras_Xmas` | HS110 plug | Terrace Christmas lights |
 | `Taras_1` | KL110 dimmer | Terrace wall lamp |
+
+### Other Items
+
+| Item | Source | Purpose |
+|------|--------|---------|
+| `Away` | virtual switch | Enables random away light at sunset |
+| `Office_Scene_Working`, `Livingroom_Scene_Kino` | virtual switches (no channel) | Scene triggers, auto-reset to OFF |
+| `Date` | NTP | Clock on sitemap |
+| `Sunrise_Time`, `Sunset_Time`, `Sun_Elevation` | Astro | Sun data; `Sun_Elevation` drives blind opening |
+| `Weather_Temp_Max_Today`, `Weather_Temp_Min_Today`, `Weather_Rain_Today`, `Weather_Code_Today`, `Weather_Temp_Max_Tomorrow` | Open-Meteo (HTTP, refresh 30 min) | Forecast; `Weather_Temp_Max_Today` drives heat protection |
 
 ---
 
@@ -359,12 +424,18 @@ This publishes `RESET` to `/{ActorName}/In/Admin` via `mosquitto_pub`.
 
 ### Running Tests
 
+Dependencies are in `psh-actor/requirements.txt` (`paho-mqtt`, `gpiozero`).
+
 ```bash
 cd psh-actor
-python3 -m pytest test_*.py
-# or
-python3 -m unittest discover -p 'test_*.py'
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # once
+.venv/bin/python -m unittest discover -p 'test_*.py'
 ```
+
+Tests that create real gpiozero devices (`test_point_factory.py`, `test_room.py`)
+install a fresh `gpiozero.pins.mock.MockFactory` in `setUp`, so no hardware and no
+`GPIOZERO_PIN_FACTORY` variable is needed. Follow the same pattern for any new
+test that goes through `PointFactory`.
 
 ### Test Coverage
 
@@ -391,18 +462,27 @@ python3 -m unittest discover -p 'test_*.py'
 1. **Wire the hardware** — connect relay to a free GPIO output pin, button to a free GPIO input pin
 2. **Update `config.json`** — add a point with `"Type": "Light"` under the appropriate room
 3. **Update `orzechowa.things`** — add a new `Type switch` channel with matching MQTT topics
-4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel, with `homekit="Lighting"`
+4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel
 5. **Update `orzechowa.sitemap`** — add the item to the appropriate frame
 6. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
 
-### Workflow: Add a New GPIO-Controlled Blind
+### Workflow: Add a New Shelly Blind (current standard)
+
+1. **Install and configure the Shelly Plus 2PM** in roller mode and calibrate it in the Shelly app
+2. **Add as Thing** via OpenHAB admin UI (Settings → Things → Inbox) — note the device ID
+3. **Update `orzechowa.items`** — add `Rollershutter Room_WindowBlind "Roleta" <rollershutter> (Room, gWindowBlindsSouth|gWindowBlindsWest) {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control"}`
+4. **Ask the user which exposure group** (South/West) the window belongs to — it decides which heat-protection rule moves it
+5. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with `mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]`
+6. **Deploy OpenHAB config**
+
+### Workflow: Add a New GPIO-Controlled Blind (via psh-actor — not used today)
 
 1. **Wire the hardware** — connect UP relay, DOWN relay, UP button, DOWN button to 4 free GPIO pins
 2. **Update `config.json`** — add a point with `"Type": "Blind"` including all 4 pin numbers and `FullTravelTimeSec`
 3. **Measure travel time** — time the blind from fully open to fully closed and set `FullTravelTimeSec`
 4. **Update `orzechowa.things`** — add a `Type rollershutter` channel with `up="UP", down="DOWN", stop="STOP"`
-5. **Update `orzechowa.items`** — add a `Rollershutter` item with `homekit="WindowCovering"`, add to `gBlind` group
-6. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with preset `mappings=[0="Otwórz", 50="1/2", 67="2/3", 100="Zamknij"]`
+5. **Update `orzechowa.items`** — add a `Rollershutter` item, add to `gWindowBlindsSouth` or `gWindowBlindsWest`
+6. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with preset `mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]`
 7. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
 
 ### Workflow: Add a New TP-Link Wi-Fi Device
@@ -425,5 +505,9 @@ python3 -m unittest discover -p 'test_*.py'
 > - **No authentication on MQTT** — Mosquitto runs without passwords (local network only)
 > - **Labels are in Polish** — OpenHAB UI labels use Polish language; maintain this convention
 > - **The `install-config.sh` script is destructive** — it deletes all existing OpenHAB config before copying new files
+> - **Add-ons are managed by `openhab/services/addons.cfg`** — `install-config.sh` deploys it; listed add-ons get installed, unlisted ones of the same type (binding, transformation, ui, misc) get uninstalled. A new binding/transformation goes into that file in the same change
 > - **Service depends on `mosquitto.service`** — MQTT broker must start before psh-actor
-> - **Blind position does not persist** — on restart, position resets to 0% (fully open)
+> - **GPIO blind position does not persist** — on restart, `BlindPoint` position resets to 0% (fully open)
+> - **Actor name `Pi1` is hardcoded** in `orzechowa.things` topics and the `Startup` rule
+> - **Shelly and TP-Link Things are not in the repo** — they live in OpenHAB's JSONDB (added via UI); `install-config.sh` does not touch them
+> - **Logs**: `psh-actor/logs/psh-actor.log` and `/var/log/openhab/openhab.log`
