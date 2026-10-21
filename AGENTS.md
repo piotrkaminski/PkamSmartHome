@@ -18,8 +18,8 @@ right now — `config.json` defines lights only.
 ## Architecture
 
 ```
-Physical Button → GPIO → psh-actor (Python) → MQTT ↔ OpenHAB → HomeKit / BasicUI
-                  GPIO ← psh-actor (Python) ← MQTT ↔ OpenHAB ← HomeKit / BasicUI
+Physical Button → GPIO → psh-actor (Python) → MQTT ↔ OpenHAB → BasicUI
+                  GPIO ← psh-actor (Python) ← MQTT ↔ OpenHAB ← BasicUI
                          Shelly roller (Wi-Fi) ←──────→ OpenHAB
                          TP-Link plug/dimmer (Wi-Fi) ←→ OpenHAB
                          Open-Meteo (HTTP + JSONPATH) → OpenHAB  (weather for blind rules)
@@ -39,8 +39,8 @@ The system has three components:
 - **paho-mqtt** — MQTT client library
 - **gpiozero** — GPIO abstraction (`LED`, `Button`, `DigitalOutputDevice`)
 - **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.1.4.
-  Required add-ons: astro, mqtt, ntp, http, shelly, tplinksmarthome, jsonpath
-  transformation, basic UI, homekit (see `readme.md`)
+  Required add-ons: astro, km200, mqtt, ntp, http, shelly, tplinksmarthome, jsonpath
+  transformation, basic UI — listed in `openhab/services/addons.cfg`
 - **Mosquitto** — MQTT broker (local, unencrypted, port 1883)
 - **systemd** — service management for the actor daemon
 
@@ -75,7 +75,7 @@ All tests must pass before suggesting deployment. Setting
 - Items use `Room_Point` naming (e.g., `Office_Light`, `Livingroom_LedTV`)
 - Groups use `g` prefix (e.g., `gLight`, `gNightLights`)
 - Labels are in Polish
-- HomeKit bindings are declared inline with items
+- HomeKit is no longer used — do not add `homekit="..."` metadata to items
 - There is no local validator for OpenHAB DSL — review syntax carefully and tell
   the user to check `/var/log/openhab/openhab.log` after deployment
 - Things in `orzechowa.things` cover MQTT, NTP, Astro and Open-Meteo only. Shelly
@@ -116,7 +116,9 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 - Code is deployed via `git pull` + `systemctl restart psh-actor`
 - OpenHAB config is deployed via `openhab/install-config.sh`, which **deletes**
   everything in `/etc/openhab/{items,things,rules,sitemaps}` before copying (it
-  backs them up to `openhab/backup/` first)
+  backs them up to `openhab/backup/` first). It also copies
+  `openhab/services/addons.cfg`, which installs the listed add-ons and
+  **uninstalls** unlisted ones of the same types — add new add-ons there
 - Logs: `psh-actor/logs/psh-actor.log` (actor), `/var/log/openhab/openhab.log` (OpenHAB)
 
 ## Access to the Pi

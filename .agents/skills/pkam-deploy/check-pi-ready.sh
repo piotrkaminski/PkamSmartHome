@@ -66,6 +66,55 @@ python3 -c 'import paho.mqtt, gpiozero' 2>/dev/null \
 code=$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/rest/sitemaps/orzechowa)
 [ "$code" = 200 ] && pass "OpenHAB REST" "sitemap orzechowa 200" || fail "OpenHAB REST" "sitemap orzechowa returned $code"
 
+# --- Add-ons --------------------------------------------------------------
+# Missing or extra add-ons are WARN, not FAIL: deploying openhab/services/addons.cfg
+# (install-config.sh) is what fixes them, so /pkam-deploy must plan that step.
+
+# "type list" lines -> one "type-id" per line, e.g. binding-astro
+addon_ids() { python3 -c '
+import re, sys
+for line in sys.stdin:
+    m = re.match(r"\s*(\w+)\s*=\s*\"?([^\"#]*)\"?\s*$", line)
+    if m and m.group(1) in ("automation", "binding", "misc", "persistence", "transformation", "ui", "voice"):
+        for a in m.group(2).split(","):
+            if a.strip(): print(m.group(1) + "-" + a.strip())'; }
+
+if [ -f "$REPO/openhab/services/addons.cfg" ]; then
+    want_cfg=$(cat "$REPO/openhab/services/addons.cfg"); want_src="openhab/services/addons.cfg"
+else
+    # Checkout predates openhab/services/addons.cfg — same list as readme "Required openHAB Add-ons".
+    want_cfg=$(printf 'binding = astro,km200,mqtt,ntp,http,shelly,tplinksmarthome\nmisc =\ntransformation = jsonpath\nui = basic\n')
+    want_src="readme list"
+fi
+want=$(echo "$want_cfg" | addon_ids)
+
+have=""
+if [ -s ~/.openhab-token ]; then
+    have=$(curl -s -H "Authorization: Bearer $(cat ~/.openhab-token)" 'localhost:8080/rest/addons?serviceId=all' | python3 -c '
+import json, sys
+for a in json.load(sys.stdin):
+    if a.get("installed"):
+        t, i = a["type"], a["id"]
+        print(i if i.startswith(t + "-") else t + "-" + i)' 2>/dev/null)
+    have_src="REST /rest/addons"
+fi
+if [ -z "$have" ] && [ -r /var/lib/openhab/config/org/openhab/addons.config ]; then
+    have=$(addon_ids < /var/lib/openhab/config/org/openhab/addons.config)
+    have_src="addons.config: configured, not proven running — no working token"
+fi
+
+if [ -z "$have" ]; then
+    warn "add-ons" "cannot read installed add-ons (no working token, addons.config unreadable)"
+else
+    missing=$(comm -23 <(echo "$want" | sort -u) <(echo "$have" | sort -u) | tr '\n' ' ')
+    # Only types with a list set (even an empty one) get uninstalled when addons.cfg is deployed.
+    types=$(echo "$want_cfg" | sed -nE 's/^[[:space:]]*(automation|binding|misc|persistence|transformation|ui|voice)[[:space:]]*=.*/\1/p' | sort -u | paste -sd'|' -)
+    extra=$(comm -13 <(echo "$want" | sort -u) <(echo "$have" | grep -E "^($types)-" | sort -u) | tr '\n' ' ')
+    [ -z "$missing" ] && pass "add-ons installed" "all from $want_src ($have_src)" \
+        || warn "add-ons missing" "${missing}— deploy openhab/services/addons.cfg via install-config.sh ($have_src)"
+    [ -z "$extra" ] || warn "add-ons not in list" "${extra}— install-config.sh would UNINSTALL them"
+fi
+
 # --- Optional -------------------------------------------------------------
 
 if [ -s ~/.openhab-token ]; then

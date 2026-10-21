@@ -7,7 +7,7 @@ description: >
   service, systemd service management, or home automation workflows.
   Trigger on: 'smart home', 'GPIO', 'MQTT', 'OpenHAB', 'psh-actor',
   'light point', 'blind point', 'window blind', 'rollershutter',
-  'room configuration', 'openHABian', 'HomeKit', 'WindowCovering',
+  'room configuration', 'openHABian',
   'TP-Link', 'Shelly', 'Open-Meteo', 'weather rule', 'Mosquitto',
   'Astro binding', 'systemd service'.
 ---
@@ -20,7 +20,7 @@ description: >
 
 ```
 ┌─────────────┐     GPIO      ┌───────────┐    MQTT     ┌──────────┐
-│  Physical   │──────────────▶│           │────────────▶│          │──▶ HomeKit
+│  Physical   │──────────────▶│           │────────────▶│          │
 │  Buttons    │               │ psh-actor │             │ OpenHAB  │──▶ BasicUI
 │             │◀──────────────│ (Python)  │◀────────────│          │──▶ Watch UI
 │  Relays     │     GPIO      │           │    MQTT     │          │
@@ -51,7 +51,7 @@ description: >
 | Component | Runs On | Manages |
 |-----------|---------|---------|
 | **psh-actor** | Raspberry Pi (systemd) | GPIO read/write, MQTT pub/sub, button debounce |
-| **OpenHAB** | Raspberry Pi (openHABian) | Automation rules, UI, HomeKit bridge, device discovery |
+| **OpenHAB** | Raspberry Pi (openHABian) | Automation rules, UI, device discovery |
 | **Mosquitto** | Raspberry Pi (systemd) | MQTT message broker (localhost:1883) |
 | **TP-Link Smart Home Binding** | OpenHAB | Wi-Fi smart plugs and dimmers (HS100, HS110, KL110) |
 | **Shelly Binding** | OpenHAB | All window blinds (Shelly Plus 2PM in roller mode) |
@@ -257,7 +257,7 @@ openhab/
 ├── things/
 │   └── orzechowa.things  # MQTT bridge, NTP, Astro bindings
 ├── items/
-│   └── orzechowa.items   # All controllable items with HomeKit tags
+│   └── orzechowa.items   # All controllable items
 ├── rules/
 │   └── orzechowa.rules   # Automation rules (sunset, sunrise, Xmas)
 └── sitemaps/
@@ -292,13 +292,13 @@ Type rollershutter : channelId [
 Light items in `orzechowa.items`:
 
 ```
-Switch  ItemName  "Label"  <icon>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId", homekit="Lighting"}
+Switch  ItemName  "Label"  <icon>  (Groups)  {channel="mqtt:topic:bridgeId:thingId:channelId"}
 ```
 
 Blind items (Shelly — current pattern):
 
 ```
-Rollershutter  Room_WindowBlind  "Roleta"  <rollershutter>  (Room, gWindowBlindsSouth)  {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control", homekit="WindowCovering"}
+Rollershutter  Room_WindowBlind  "Roleta"  <rollershutter>  (Room, gWindowBlindsSouth)  {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control"}
 ```
 
 Every blind must be in exactly one exposure group (`gWindowBlindsSouth` or
@@ -367,7 +367,7 @@ above). These lamps and plugs are controlled through the TP-Link binding (Wi-Fi)
 | Item | Source | Purpose |
 |------|--------|---------|
 | `Away` | virtual switch | Enables random away light at sunset |
-| `Office_Scene_Working`, `Livingroom_Scene_Kino` | virtual switches (HomeKit `Switchable`) | Scene triggers, auto-reset to OFF |
+| `Office_Scene_Working`, `Livingroom_Scene_Kino` | virtual switches (no channel) | Scene triggers, auto-reset to OFF |
 | `Date` | NTP | Clock on sitemap |
 | `Sunrise_Time`, `Sunset_Time`, `Sun_Elevation` | Astro | Sun data; `Sun_Elevation` drives blind opening |
 | `Weather_Temp_Max_Today`, `Weather_Temp_Min_Today`, `Weather_Rain_Today`, `Weather_Code_Today`, `Weather_Temp_Max_Tomorrow` | Open-Meteo (HTTP, refresh 30 min) | Forecast; `Weather_Temp_Max_Today` drives heat protection |
@@ -462,7 +462,7 @@ test that goes through `PointFactory`.
 1. **Wire the hardware** — connect relay to a free GPIO output pin, button to a free GPIO input pin
 2. **Update `config.json`** — add a point with `"Type": "Light"` under the appropriate room
 3. **Update `orzechowa.things`** — add a new `Type switch` channel with matching MQTT topics
-4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel, with `homekit="Lighting"`
+4. **Update `orzechowa.items`** — add a new `Switch` item linked to the thing channel
 5. **Update `orzechowa.sitemap`** — add the item to the appropriate frame
 6. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
 
@@ -470,7 +470,7 @@ test that goes through `PointFactory`.
 
 1. **Install and configure the Shelly Plus 2PM** in roller mode and calibrate it in the Shelly app
 2. **Add as Thing** via OpenHAB admin UI (Settings → Things → Inbox) — note the device ID
-3. **Update `orzechowa.items`** — add `Rollershutter Room_WindowBlind "Roleta" <rollershutter> (Room, gWindowBlindsSouth|gWindowBlindsWest) {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control", homekit="WindowCovering"}`
+3. **Update `orzechowa.items`** — add `Rollershutter Room_WindowBlind "Roleta" <rollershutter> (Room, gWindowBlindsSouth|gWindowBlindsWest) {channel="shelly:shellyplus2pm-roller:<deviceId>:roller#control"}`
 4. **Ask the user which exposure group** (South/West) the window belongs to — it decides which heat-protection rule moves it
 5. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with `mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]`
 6. **Deploy OpenHAB config**
@@ -481,7 +481,7 @@ test that goes through `PointFactory`.
 2. **Update `config.json`** — add a point with `"Type": "Blind"` including all 4 pin numbers and `FullTravelTimeSec`
 3. **Measure travel time** — time the blind from fully open to fully closed and set `FullTravelTimeSec`
 4. **Update `orzechowa.things`** — add a `Type rollershutter` channel with `up="UP", down="DOWN", stop="STOP"`
-5. **Update `orzechowa.items`** — add a `Rollershutter` item with `homekit="WindowCovering"`, add to `gWindowBlindsSouth` or `gWindowBlindsWest`
+5. **Update `orzechowa.items`** — add a `Rollershutter` item, add to `gWindowBlindsSouth` or `gWindowBlindsWest`
 6. **Update `orzechowa.sitemap`** — add `Slider` + `Switch` with preset `mappings=[0="Otwórz", 30="1/3", 50="1/2", 100="Zamknij"]`
 7. **Deploy** — `git push`, then on the Pi: `git pull` + restart actor + reinstall OpenHAB config
 
@@ -505,6 +505,7 @@ test that goes through `PointFactory`.
 > - **No authentication on MQTT** — Mosquitto runs without passwords (local network only)
 > - **Labels are in Polish** — OpenHAB UI labels use Polish language; maintain this convention
 > - **The `install-config.sh` script is destructive** — it deletes all existing OpenHAB config before copying new files
+> - **Add-ons are managed by `openhab/services/addons.cfg`** — `install-config.sh` deploys it; listed add-ons get installed, unlisted ones of the same type (binding, transformation, ui, misc) get uninstalled. A new binding/transformation goes into that file in the same change
 > - **Service depends on `mosquitto.service`** — MQTT broker must start before psh-actor
 > - **GPIO blind position does not persist** — on restart, `BlindPoint` position resets to 0% (fully open)
 > - **Actor name `Pi1` is hardcoded** in `orzechowa.things` topics and the `Startup` rule

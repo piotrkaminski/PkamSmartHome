@@ -40,7 +40,7 @@ Step 0 checks all of this read-only.
 |---|-------|--------------|
 | R1 | dev machine | `ssh -o BatchMode=yes pkam-pi true` works: `Host pkam-pi` in `~/.ssh/config` (user `pshactor`), dev public key in the Pi's `~pshactor/.ssh/authorized_keys`, Pi host key already accepted |
 | R2 | dev machine | Repo cloned with push access to `origin`; `psh-actor/.venv` built from `requirements.txt` (for Step 1 tests) |
-| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 with every add-on in readme "Required openHAB Add-ons", Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
+| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 (add-ons come from `openhab/services/addons.cfg`, see Step 3), Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
 | R4 | Pi | User `pshactor` in groups `sudo` and `gpio` |
 | R5 | Pi | Repo at `/home/pshactor/PkamSmartHome`, `origin` = `git@github.com:piotrkaminski/PkamSmartHome.git`, `pshactor` can fetch without prompts (SSH key on GitHub, `github.com` in `known_hosts`), clean working tree. Any branch is fine if it tracks an `origin` branch and has no commits that are not on origin; a detached HEAD must be a commit that exists on origin |
 | R6 | Pi | `install-environment.sh` run once (`paho-mqtt` + `gpiozero` importable by system `python3`, `psh-actor/logs/` exists) |
@@ -88,6 +88,9 @@ ssh -o BatchMode=yes pkam-pi 'bash -s' < .agents/skills/pkam-deploy/check-pi-rea
 - Exit code 0 / `READY` = all required checks passed. Any `FAIL` = **stop**, list
   the failed checks, and point to the matching R-row above and readme →
   "Prepare the Pi for /pkam-deploy". Do not try to fix the Pi yourself.
+- `add-ons missing` / `add-ons not in list` WARNs are deploy work, not readiness
+  failures: they mean the Pi's add-ons differ from `openhab/services/addons.cfg`,
+  and Step 3 must plan `install-config.sh` (see the add-ons row there).
 - Carry each `WARN` into the plan (Step 3) and the report (Step 6) so the user
   knows which checks will be SKIPPED and why.
 - If `ssh` itself fails (R1), stop and tell the user. Never try other hosts,
@@ -153,8 +156,9 @@ Map changed paths to actions:
 | `psh-actor/requirements.txt` | run `install-environment.sh` |
 | `psh-actor/*.py` (non-test), `psh-actor/config/*`, `psh-actor/logging.conf` | restart `psh-actor` |
 | `openhab/**` | `sudo ./install-config.sh` (OpenHAB hot-reloads files; no restart) |
+| `openhab/services/addons.cfg`, or Step 0 warned `add-ons missing` / `add-ons not in list` | `sudo ./install-config.sh` — it installs every listed add-on and **uninstalls** unlisted ones of the listed types (bindings, transformations, UIs, misc). Name both sets in the plan |
 | `linux-service/**` | `sudo ./install-service.sh` (includes daemon-reload + restart) |
-| new binding/transformation referenced in `openhab/` | **stop** — user must install the add-on first (readme "Required openHAB Add-ons") |
+| new binding/transformation referenced in `openhab/` but not in `openhab/services/addons.cfg` | **stop** — the add-on must be added to `addons.cfg` in the repo first |
 
 Present to the user: commits being deployed (`git log --oneline PREV_SHA..origin/<ref>`),
 the action list, lights that will go OFF, and the rollback point `PREV_SHA`.
@@ -175,7 +179,9 @@ ssh -t pkam-pi 'sudo systemctl restart psh-actor'                             # 
 ```
 
 If `sudo` needs a password, ask the user to run that line themselves with `! ssh -t pkam-pi ...`.
-Wait ~10 s after a restart or config install before verifying.
+Wait ~10 s after a restart or config install before verifying — or ~2 min when
+add-ons are being installed (a Pi 3 is slow to start bundles; Things whose binding
+is not up yet stay `UNINITIALIZED` meanwhile).
 
 ## Step 5 — Verify
 
@@ -244,6 +250,7 @@ failure, and never ask the user to paste the token into the chat.
 
 | Check | Command | Pass when |
 |-------|---------|-----------|
+| Add-ons match | re-run Step 0's script and read its `add-ons` lines | `add-ons installed` PASS. Without a token it only proves the config was applied, so say so in the report; `openhab.log` lines like `Failed installing` are FAIL |
 | Models loaded | `grep -a` without sudo first; if the log is unreadable for `pshactor`, mark SKIPPED (not PASS) — `sudo grep -a "<T0 date>" /var/log/openhab/openhab.log \| grep -E "Loading model\|ERROR\|WARN"` | each changed `orzechowa.*` file logs `Loading model`; no `ERROR` and no new `Configuration model ... has errors` |
 | Things online | `curl -s -H "Authorization: Bearer $(cat ~/.openhab-token)" localhost:8080/rest/things` → parse `UID` + `statusInfo.status` with `python3 -c` | every Thing ONLINE, or same status as the Step 2 baseline. No token → SKIPPED |
 | Items have state | `curl -s localhost:8080/rest/items/<Item>/state` for each item in `orzechowa.items` (works without token) | no item from the changed file missing; MQTT/Shelly/weather items not `NULL`/`UNDEF` |
@@ -265,7 +272,7 @@ Reply with:
 
 - Deployed `PREV_SHA` → `NEW_SHA` (ref name), actions run.
 - A table of every check: component, check, PASS/FAIL/SKIPPED/INFO, evidence (one line).
-- Things for the user to confirm physically (wall button toggles a light, HomeKit
+- Things for the user to confirm physically (wall button toggles a light, BasicUI
   shows the change, blinds respond).
 - Overall verdict: **SUCCESS** only if no FAIL.
 

@@ -63,7 +63,8 @@ Update this table after every successful upgrade or reinstall.
     1. Point location or you home
     1. Skip proposed storage Add-ons
     1. Skip install discovered Add-ons, it is safer to install them manually in later phase, one by one.
-    1. Install all Add-ons listed in [Required openHAB Add-ons](#required-openhab-add-ons) below.
+    1. Do not install add-ons here: `install-config.sh` installs every one listed in
+       [Required openHAB Add-ons](#required-openhab-add-ons) from `openhab/services/addons.cfg`.
 1. Back to terminal and create `pshactor` user. This account will be used for PkamSmartHome actor service.
     1. Execute `sudo adduser pshactor`
     1. Provide additional details if would like to.
@@ -89,6 +90,7 @@ running `install-config.sh`.
 | **HTTP Binding** | `http` | `http:url:openmeteo` | **Weather forecast from Open-Meteo (heat-protection rule)** |
 | Shelly Binding | `shelly` | `shelly:shellyplus2pm-roller:...` | Office window blind (`Office_WindowBlind`) |
 | TP-Link Smart Home Binding | `tplinksmarthome` | `tplinksmarthome:*` | Wi-Fi plugs and dimmers (lamps, Xmas lights) |
+| Buderus KM200 Binding | `km200` | Thing added in the UI (not in the repo) | Buderus heating gateway |
 
 ### Transformations
 
@@ -101,16 +103,27 @@ running `install-config.sh`.
 > miss. Without it the HTTP Thing comes up ONLINE but every weather Item stays `NULL`,
 > and `openhab.log` reports that the transformation service is not available.
 
-### User Interfaces & Integrations
+### User Interfaces
 
 | Add-on | Add-on ID | Needed for |
 |--------|-----------|------------|
 | Basic UI | `basic` | Serving `orzechowa.sitemap` and `watch.sitemap` |
-| HomeKit Integration | `homekit` | Exposing Items to Apple Home (`homekit="..."` metadata) |
 
 ### Installing the Add-ons
 
-Any one of the three methods below works — pick one.
+The list is kept in the repo, in `openhab/services/addons.cfg`, and
+`openhab/install-config.sh` copies it to `/etc/openhab/services/addons.cfg`. openHAB
+applies it within seconds. This is the normal way — to add an add-on, add it to that
+file and deploy.
+
+> **Warning**: every list set in `addons.cfg` is authoritative. Add-ons of that type
+> (binding, transformation, ui, misc) that are not listed — including ones installed
+> through the UI — are **uninstalled** at every openHAB start. Install add-ons
+> through the repo file only.
+
+The options below are for troubleshooting, or for a Pi without the repo yet. Once
+`addons.cfg` is deployed, anything installed this way that is not in the file is
+removed again.
 
 **Option 1 — Main UI**: Settings -> Add-ons, then pick the relevant tab (Bindings /
 Transformations / User Interfaces) and install each entry from the tables above.
@@ -130,29 +143,19 @@ addons:install openhab-binding-ntp
 addons:install openhab-binding-http
 addons:install openhab-binding-shelly
 addons:install openhab-binding-tplinksmarthome
+addons:install openhab-binding-km200
 addons:install openhab-transformation-jsonpath
 addons:install openhab-ui-basic
-addons:install openhab-io-homekit
 ```
 
 Type `logout` to leave the console. Default console credentials are `openhab/habopen`.
 
-**Option 3 — `addons.cfg`**: edit `/etc/openhab/services/addons.cfg` and set:
-
-```
-binding = astro,mqtt,ntp,http,shelly,tplinksmarthome
-transformation = jsonpath
-ui = basic
-misc = homekit
-```
-
-Add-ons are installed automatically a few seconds after the file is saved.
 
 ### Verifying the Add-ons are active
 
 ```
 openhab-cli console
-openhab> addons:list | grep -Ei 'http|jsonpath|shelly|mqtt|astro|ntp|tplink|basic|homekit'
+openhab> addons:list | grep -Ei 'http|jsonpath|shelly|mqtt|astro|ntp|tplink|km200|basic'
 ```
 
 Each line should read `Installed`. To confirm the weather integration specifically,
@@ -310,10 +313,11 @@ This step puts all points into standard (initial) mode. Initial installation doe
 
 This step is needed when items, thing or configuration files are updated or added to PkamSmartHome project, but specifically openhab configuration files, not psh-actor project python code. Initial installation does not require this step.
 
-> **Important**: `install-config.sh` only copies `.things`, `.items`, `.rules` and
-> `.sitemap` files — it does **not** install openHAB Add-ons. If a `git pull` brought in
-> configuration that uses a new binding or transformation, install it first (see
-> [Required openHAB Add-ons](#required-openhab-add-ons)), otherwise the new Things will
+> **Important**: `install-config.sh` copies the `.things`, `.items`, `.rules` and
+> `.sitemap` files and `services/addons.cfg`, so it also installs and uninstalls
+> add-ons to match that file (see [Installing the Add-ons](#installing-the-add-ons)).
+> Configuration that uses a new binding or transformation must add it to
+> `openhab/services/addons.cfg` in the same change, otherwise the new Things will
 > fail to initialize.
 
 1. Update configurations
