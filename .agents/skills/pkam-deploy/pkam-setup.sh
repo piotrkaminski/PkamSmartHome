@@ -88,7 +88,8 @@ step_status() {
         || line TODO create-user
     [ "$(timedatectl show -p Timezone --value)" = "$TZ_NAME" ] && in_group "$ACTOR" openhab && command -v pip3 >/dev/null \
         && ! grep -qE "$BUS_ON" "$BOOT_CFG" && line DONE system || line TODO system
-    [ -d /sys/class/i2c-adapter/i2c-1 ] || [ -e /dev/spidev0.0 ] && line WARN gpio "I2C or SPI still active — reboot"
+    # A pin in an alt mode (a0..a5) is held by a kernel driver; psh-actor needs ip/op.
+    pinctrl get 2-3,9-11 2>/dev/null | grep -q ': a[0-5] ' && line WARN gpio "BCM 2/3 or 9-11 held by I2C/SPI — reboot"
     is_installed "$JAVA_PKG" && line DONE java "$(java -version 2>&1 | head -1)" || line TODO java
     v=$(installed_version openhab)
     if [ -n "$v" ] && dpkg --compare-versions "$v" ge "$OPENHAB_KNOWN_GOOD" \

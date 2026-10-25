@@ -131,7 +131,8 @@ sudo -n true 2>/dev/null && pass "sudo" "passwordless" || warn "sudo" "asks for 
 
 tz=$(timedatectl show -p Timezone --value 2>/dev/null)
 [ "$tz" = Europe/Warsaw ] && pass "OS timezone" "$tz" || warn "OS timezone" "$tz, expected Europe/Warsaw"
-jvm=$(grep -o 'user.timezone=[^ "]*' /etc/default/openhab 2>/dev/null | sort -u)
+# Skip comments: the stock file has a commented example with Europe/Berlin.
+jvm=$(grep -v '^[[:space:]]*#' /etc/default/openhab 2>/dev/null | grep -o 'user.timezone=[^ "]*' | sort -u)
 [ "$jvm" = user.timezone=Europe/Warsaw ] && pass "JVM timezone" "Europe/Warsaw" \
     || warn "JVM timezone" "/etc/default/openhab has: $(echo ${jvm:-none} | tr '\n' ' ')— expected one user.timezone=Europe/Warsaw"
 
