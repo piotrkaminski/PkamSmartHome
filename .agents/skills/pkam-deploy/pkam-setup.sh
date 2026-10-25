@@ -72,7 +72,8 @@ apt_install() {
     apt-get install -y -o DPkg::Lock::Timeout=120 "$@"
 }
 
-is_installed() { dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q 'install ok installed'; }
+# db:Status-Status, not Status: a held package reads "hold ok installed".
+is_installed() { [ "$(dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null)" = installed ]; }
 installed_version() { is_installed "$1" && dpkg-query -W -f='${Version}' "$1"; }
 in_group() { id -nG "$1" 2>/dev/null | tr ' ' '\n' | grep -qx "$2"; }
 line() { printf '%-5s %-12s %s\n' "$1" "$2" "${3:-}"; }
@@ -185,7 +186,8 @@ step_openhab() {
     systemctl enable openhab
     systemctl restart openhab
     log "waiting for openHAB REST (a Pi 3 needs several minutes on first start)"
-    for _ in $(seq 60); do curl -s -o /dev/null localhost:8080/rest/ && break; sleep 10; done
+    # Jetty answers 404 before the REST bundle is up, so wait for the version, not any reply.
+    for _ in $(seq 60); do curl -s localhost:8080/rest/ | grep -q '"version"' && break; sleep 10; done
     curl -s localhost:8080/rest/ | grep -o '"version":"[^"]*"' || die "openHAB REST not up after 10 min — check /var/log/openhab/openhab.log"
 }
 
