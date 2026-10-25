@@ -162,7 +162,7 @@ Map changed paths to actions:
 | `psh-actor/*.py` (non-test), `psh-actor/config/*`, `psh-actor/logging.conf` | restart `psh-actor` |
 | `openhab/**` | `sudo ./install-config.sh` (OpenHAB hot-reloads files; no restart) |
 | `openhab/services/addons.cfg`, or Step 0 warned `add-ons missing` / `add-ons not in list` | `sudo ./install-config.sh` — it installs every listed add-on and **uninstalls** unlisted ones of the listed types (bindings, transformations, UIs, misc). Name both sets in the plan |
-| `linux-service/**` | `sudo ./install-service.sh` (includes daemon-reload + restart) |
+| `linux-service/**` | `sudo ./install-service.sh` **and** restart `psh-actor` — the script runs daemon-reload + `systemctl start`, which does nothing while the service is already running, so a changed unit only takes effect after the restart |
 | new binding/transformation referenced in `openhab/` but not in `openhab/services/addons.cfg` | **stop** — the add-on must be added to `addons.cfg` in the repo first |
 
 Present to the user: commits being deployed (`git log --oneline PREV_SHA..origin/<ref>`),
