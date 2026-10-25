@@ -10,7 +10,7 @@
 #   mirror              point apt at RASPBIAN_MIRROR instead of the redirector
 #   system              timezone, base packages, group memberships
 #   java                OpenJDK 21 (with dead-mirror fallback)
-#   openhab             openHAB 5.1.4 pinned + held, JVM options, service enabled
+#   openhab             openHAB (known-good 5.1.4, or a newer one already installed) held, JVM options, service enabled
 #   mosquitto           Mosquitto broker on localhost:1883, no auth
 #   hostname <name>     set the host name
 #   actor <branch>      clone repo as pshactor, install env, config, service
@@ -20,7 +20,9 @@
 set -u
 export DEBIAN_FRONTEND=noninteractive
 
-OPENHAB_VERSION=5.1.4-1
+# Last version confirmed on the house Pi (readme: Known-good versions). A newer installed
+# version is kept with a WARNING, never downgraded.
+OPENHAB_KNOWN_GOOD=5.1.4-1
 JAVA_PKG=openjdk-21-jre-headless
 TZ_NAME=Europe/Warsaw
 JAVA_OPTS='EXTRA_JAVA_OPTS="-Xms192m -Xmx384m -XX:-TieredCompilation -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError -Dxtext.qn.interning=true -Duser.timezone=Europe/Warsaw"'
@@ -71,6 +73,7 @@ apt_install() {
 }
 
 is_installed() { dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q 'install ok installed'; }
+installed_version() { is_installed "$1" && dpkg-query -W -f='${Version}' "$1"; }
 in_group() { id -nG "$1" 2>/dev/null | tr ' ' '\n' | grep -qx "$2"; }
 line() { printf '%-5s %-12s %s\n' "$1" "$2" "${3:-}"; }
 
@@ -83,9 +86,11 @@ step_status() {
     [ "$(timedatectl show -p Timezone --value)" = "$TZ_NAME" ] && in_group "$ACTOR" openhab && command -v pip3 >/dev/null \
         && line DONE system || line TODO system
     is_installed "$JAVA_PKG" && line DONE java "$(java -version 2>&1 | head -1)" || line TODO java
-    v=$(dpkg-query -W -f='${Version}' openhab 2>/dev/null)
-    if [ "$v" = "$OPENHAB_VERSION" ] && grep -qxF "$JAVA_OPTS" /etc/default/openhab 2>/dev/null; then
-        line DONE openhab "$v, $(apt-mark showhold | grep -c '^openhab') packages held, service $(systemctl is-active openhab)"
+    v=$(installed_version openhab)
+    if [ -n "$v" ] && dpkg --compare-versions "$v" ge "$OPENHAB_KNOWN_GOOD" \
+        && [ "$(installed_version openhab-addons)" = "$v" ] && grep -qxF "$JAVA_OPTS" /etc/default/openhab 2>/dev/null; then
+        newer=; [ "$v" != "$OPENHAB_KNOWN_GOOD" ] && newer=" (WARNING: newer than known-good $OPENHAB_KNOWN_GOOD)"
+        line DONE openhab "$v$newer, $(apt-mark showhold | grep -c '^openhab') packages held, service $(systemctl is-active openhab)"
     else
         line TODO openhab "${v:-not installed}"
     fi
@@ -150,11 +155,26 @@ step_java() {
 step_openhab() {
     is_installed "$JAVA_PKG" || die "run the java step first"
     apt-get update -o DPkg::Lock::Timeout=120 >/dev/null
-    apt-cache madison openhab | grep -q " $OPENHAB_VERSION " \
-        || die "openhab $OPENHAB_VERSION is not available from the configured apt repos — ask the user which version to use (readme: Known-good versions)"
+    # Keep an installed version at or above known-good (never downgrade); otherwise install
+    # known-good, or the newest available one if known-good is gone from the repo.
+    v=$(installed_version openhab)
+    if [ -z "$v" ] || dpkg --compare-versions "$v" lt "$OPENHAB_KNOWN_GOOD"; then
+        if apt-cache madison openhab | grep -q " $OPENHAB_KNOWN_GOOD "; then
+            v=$OPENHAB_KNOWN_GOOD
+        else
+            v=$(apt-cache madison openhab | awk '{print $3}' | sort -V | tail -1)
+            [ -n "$v" ] || die "no openhab package in the configured apt repos"
+        fi
+    fi
+    if [ "$v" != "$OPENHAB_KNOWN_GOOD" ]; then
+        echo "WARNING: openhab $v is not the known-good $OPENHAB_KNOWN_GOOD — check its release notes for 32-bit (armhf) and Java support (readme: Known-good versions). Continuing."
+    fi
     apt-mark unhold openhab openhab-addons >/dev/null 2>&1
-    apt_install --allow-downgrades "openhab=$OPENHAB_VERSION" "openhab-addons=$OPENHAB_VERSION"
+    if [ "$(installed_version openhab)" != "$v" ] || [ "$(installed_version openhab-addons)" != "$v" ]; then
+        apt_install "openhab=$v" "openhab-addons=$v"
+    fi
     apt-mark hold openhab openhab-addons
+    log "openhab $v held"
     f=/etc/default/openhab
     if ! grep -qxF "$JAVA_OPTS" "$f"; then
         cp -a "$f" "$f.pkam-setup.bak"

@@ -96,8 +96,9 @@ four lines of the block.
 ## Phase 2 — System, Java, openHAB, Mosquitto (agent)
 
 Show the plan and get one explicit yes. The plan lists the host name (ask the user
-which one they want; the default is to keep `openhabian`), the openHAB version
-`5.1.4-1` pinned and held, `EXTRA_JAVA_OPTS` overwritten with the known-good line,
+which one they want; the default is to keep `openhabian`), the openHAB version that
+will be held (known-good `5.1.4-1`, or the newer one already installed: it is
+kept, never downgraded, and the plan says it is untested), `EXTRA_JAVA_OPTS` overwritten with the known-good line,
 timezone `Europe/Warsaw`, apt switched to the fixed Raspbian mirror, and Mosquitto with no authentication on localhost. Then:
 
 ```bash
@@ -115,8 +116,10 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
 - `java` / `openhab` / `mosquitto` lines with `got <file> from <mirror>` mean the
   dead-mirror fallback worked. Mention it in the report.
 - `openhab` waits up to 10 minutes for REST. A Pi 3 is slow on first start.
-- If `openhab` says 5.1.4-1 is not available, stop and ask the user which version
-  to use (readme → Known-good versions explains the 32-bit risk).
+- A `WARNING: openhab <version> is not the known-good ...` line does not stop the
+  setup. Carry it into the final report and point to readme → Known-good versions
+  (32-bit risk). It appears when a newer openHAB is already installed, or when
+  5.1.4-1 is no longer in the repo and the newest one was installed instead.
 - On any `ERROR:` line, stop, show it, and fix the cause in the repo, not on the
   Pi. Re-running a step is safe.
 

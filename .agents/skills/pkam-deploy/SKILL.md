@@ -41,7 +41,7 @@ Step 0 checks all of this read-only.
 |---|-------|--------------|
 | R1 | dev machine | `ssh -o BatchMode=yes pkam-pi true` works: `Host pkam-pi` in `~/.ssh/config` (user `pshactor`), dev public key in the Pi's `~pshactor/.ssh/authorized_keys`, Pi host key already accepted |
 | R2 | dev machine | Repo cloned with push access to `origin`; `psh-actor/.venv` built from `requirements.txt` (for Step 1 tests) |
-| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 (add-ons come from `openhab/services/addons.cfg`, see Step 3), Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
+| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 or newer (5.1.4 is the known-good version, see readme; add-ons come from `openhab/services/addons.cfg`, see Step 3), Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
 | R4 | Pi | User `pshactor` in groups `sudo` and `gpio` |
 | R5 | Pi | Repo at `/home/pshactor/PkamSmartHome`, `origin` = `git@github.com:piotrkaminski/PkamSmartHome.git`, `pshactor` can fetch without prompts (SSH key on GitHub, `github.com` in `known_hosts`), clean working tree. Any branch is fine if it tracks an `origin` branch and has no commits that are not on origin; a detached HEAD must be a commit that exists on origin |
 | R6 | Pi | `install-environment.sh` run once (`paho-mqtt` + `gpiozero` importable by system `python3`, `psh-actor/logs/` exists) |

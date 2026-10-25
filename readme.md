@@ -26,6 +26,11 @@ JVM options in `/etc/default/openhab` that work on this 1 GB Pi:
 EXTRA_JAVA_OPTS="-Xms192m -Xmx384m -XX:-TieredCompilation -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError -Dxtext.qn.interning=true -Duser.timezone=Europe/Warsaw"
 ```
 
+A newer openHAB also works if it supports `armhf` and the installed Java. The
+`/pkam-deploy --setup` helper keeps a newer version that openHABian already
+installed (it never downgrades) and prints a warning. Record the version here once
+it has been confirmed on the house Pi.
+
 **Installing this exact openHAB version** (if it is still in the openHAB apt
 repository) and preventing accidental upgrades:
 

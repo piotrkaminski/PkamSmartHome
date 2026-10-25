@@ -38,7 +38,8 @@ The system has three components:
 - **Python 3** — main language for `psh-actor`
 - **paho-mqtt** — MQTT client library
 - **gpiozero** — GPIO abstraction (`LED`, `Button`, `DigitalOutputDevice`)
-- **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.1.4.
+- **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.1.4
+  (known-good; newer versions are allowed but untested, see readme → Known-good versions).
   Required add-ons: astro, km200, mqtt, ntp, http, shelly, tplinksmarthome, jsonpath
   transformation, basic UI — listed in `openhab/services/addons.cfg`
 - **Mosquitto** — MQTT broker (local, unencrypted, port 1883)
