@@ -16,9 +16,15 @@ after `!`) when a command prompts for it.
 | `pkam-pi-setup` | `openhabian` | This setup: read-only checks and `sudo -n /usr/local/sbin/pkam-setup <step>` |
 | `pkam-pi` | `pshactor` | The normal deploy, from Phase 4 on |
 
-Both aliases must point to the same `HostName`. For a test Pi, point both at it,
-and switch `pkam-pi` back to the production Pi when testing is over (say so in the
-final report). If `ssh -o BatchMode=yes pkam-pi-setup true` fails, stop and tell the
+Both aliases must point to the same `HostName`. Ask first whether the Pi is a
+test Pi or **replaces** the production Pi, and whether its IP is final:
+
+- **Test Pi:** point both at it, and switch `pkam-pi` back to the production Pi when
+  testing is over (say so in the final report).
+- **Replacement:** point both at the new Pi and remove the old IP from
+  `~/.ssh/config` (back it up first), so no command can reach the old Pi by
+  mistake. Never touch the old Pi.
+ If `ssh -o BatchMode=yes pkam-pi-setup true` fails, stop and tell the
 user (Phase 0). Never try passwords, other users or other hosts.
 
 The only root access the agent gets is `pkam-setup.sh`, installed root-owned as
@@ -57,8 +63,23 @@ ssh pkam-pi-setup 'grep -h "FAILED" /boot/firmware/first-boot.log /boot/first-bo
 ```
 
 (If neither log exists, `curl -s http://<pi-ip>:81/first-boot.txt` serves the
-same file until the next reboot.) Report what failed. The steps below
-repair the usual failures: missing Java, missing openHAB, and dead Raspbian mirrors.
+same file until the next reboot. The log can also exist and be **empty**; then judge
+by `java -version` and `dpkg-query` alone.) Report what failed. The steps below
+repair the usual failures: missing Java and missing openHAB.
+
+openHABian may install a **newer openHAB than known-good** (2026-10: it installed
+5.2.3). That is fine; the `openhab` step keeps it (see Phase 2).
+
+Also check power, read-only, as `openhabian` (`pshactor` cannot open `/dev/vcio`):
+
+```bash
+ssh pkam-pi-setup 'vcgencmd get_throttled; journalctl -k -b --no-pager | grep -c "Undervoltage detected"; journalctl --list-boots --no-pager | tail -3'
+```
+
+Anything but `throttled=0x0` means a weak power supply (bit 0 = undervoltage now,
+bit 16 = since boot). An unexplained reboot during setup is the usual sign. Warn the
+user (SD card corruption risk) and recommend an official 5.1 V / 2.5 A supply; if
+they continue anyway, repeat the check in the final report.
 
 ## Phase 1 — Bootstrap the helper (USER, one terminal session)
 
@@ -83,36 +104,54 @@ ssh -t pkam-pi-setup '
   sudo chmod 440 /etc/sudoers.d/pkam-setup && sudo visudo -cf /etc/sudoers.d/pkam-setup &&
   sudo pkam-setup create-user &&
   echo "--- new password for pshactor:" && sudo passwd pshactor &&
-  echo "--- change the openhabian password:" && passwd'
+  echo "--- change the openhabian password:" && passwd; sudo -K'
 ```
 
 The hash printed on the Pi must equal the local `shasum`. Check:
 `ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'`. `create-user`
-must be DONE with "password set".
+must be DONE with "password set". Also check `ssh pkam-pi-setup 'sudo -n true'`
+asks for a password: the trailing `sudo -K` drops the user's cached sudo login, which
+would otherwise give the agent full root for a few minutes. If it does not ask, run
+`ssh pkam-pi-setup 'sudo -K'`.
 
-If `pkam-setup.sh` changes later in the setup, the user re-runs only the first
-four lines of the block.
+If `pkam-setup.sh` changes later in the setup (a fix found mid-setup goes into the
+repo, is committed and pushed, then copied again with the `scp` above), the user
+re-installs only the helper:
+
+```bash
+ssh -t pkam-pi-setup '
+  sha256sum /tmp/pkam-setup.sh &&
+  sudo install -o root -g root -m 755 /tmp/pkam-setup.sh /usr/local/sbin/pkam-setup &&
+  sudo -K'
+```
 
 ## Phase 2 — System, Java, openHAB, Mosquitto (agent)
 
 Show the plan and get one explicit yes. The plan lists the host name (ask the user
 which one they want; the default is to keep `openhabian`), the openHAB version that
-will be held (known-good `5.1.4-1`, or the newer one already installed: it is
+will be held (known-good `5.2.3-1`, or the newer one already installed: it is
 kept, never downgraded, and the plan says it is untested), `EXTRA_JAVA_OPTS` overwritten with the known-good line,
-timezone `Europe/Warsaw`, I2C/SPI turned off (needs a reboot), apt switched to the fixed Raspbian mirror, and Mosquitto with no authentication on localhost. Then:
+timezone `Europe/Warsaw`, I2C/SPI turned off (needs a reboot), and Mosquitto with
+no authentication on localhost. The apt sources are **not** changed (see `mirror`
+below). Then:
 
 ```bash
-for s in mirror system java openhab mosquitto; do
+for s in system java openhab mosquitto; do
   ssh pkam-pi-setup "sudo -n /usr/local/sbin/pkam-setup $s" || break
 done
 ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup hostname <name>'   # only if a new name was given
 ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
 ```
 
-- `mirror` points apt at one fixed Raspbian mirror instead of the
-  `raspbian.raspberrypi.com` redirector, which picks mirrors per file, including
-  dead and Russian ones. **The user does not want Russian or Belarusian
-  mirrors:** never add a `.ru` / `.by` mirror, and never suggest one in a manual fix.
+- **Do not run `mirror`.** The user decided (2026-10) to keep openHABian's apt
+  sources as they are, on this and future installs. `status` shows it as INFO.
+  Run it only if the user asks for it in that session. It points apt at one fixed
+  Raspbian mirror instead of the `raspbian.raspberrypi.com` redirector, which picks
+  mirrors per file, including dead and Russian ones. **The user does not want
+  Russian or Belarusian mirrors:** never add a `.ru` / `.by` mirror, and never
+  suggest one in a manual fix.
+- Run long steps (`openhab`, `actor`) in the background with output to a file in
+  the scratchpad; `openhab` can take minutes.
 - `java` / `openhab` / `mosquitto` lines with `got <file> from <mirror>` mean the
   dead-mirror fallback worked. Mention it in the report.
 - `system` turns off I2C and SPI in `/boot/firmware/config.txt`, because
@@ -120,11 +159,14 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
   `REBOOT NEEDED`, the Pi must reboot before Phase 4 (put the reboot in the plan;
   the user runs `ssh -t pkam-pi-setup sudo reboot`). Until then `psh-actor` fails
   with `lgpio.error: 'unexpected error'`.
-- `openhab` waits up to 10 minutes for REST. A Pi 3 is slow on first start.
+- `openhab` restarts openHAB and waits up to 10 minutes for REST (about 2 minutes
+  on a Pi 3 with 5.2.3).
+- `hostname` changes the name only; the `pshactor` key comment keeps the old name,
+  which is harmless.
 - A `WARNING: openhab <version> is not the known-good ...` line does not stop the
   setup. Carry it into the final report and point to readme → Known-good versions
   (32-bit risk). It appears when a newer openHAB is already installed, or when
-  5.1.4-1 is no longer in the repo and the newest one was installed instead.
+  5.2.3-1 is no longer in the repo and the newest one was installed instead.
 - On any `ERROR:` line, stop, show it, and fix the cause in the repo, not on the
   Pi. Re-running a step is safe.
 
@@ -137,7 +179,9 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
 2. **openHAB admin account.** The user opens `http://<pi-ip>:8080` and creates
    the admin user. In the setup wizard they set the location, skip the proposed
    storage add-ons, and **skip installing discovered add-ons**, because add-ons
-   come from `openhab/services/addons.cfg`.
+   come from `openhab/services/addons.cfg`. Logging in with the token name as user
+   name shows up as `Authentication failed ... User not found` in `openhab.log`;
+   harmless.
 3. **API token** (enables the token-only deploy checks): user name (bottom left) →
    *Create new API token*. It must be saved as `pshactor`, so this waits until the
    alias works (Phase 4). The user runs:
@@ -168,6 +212,23 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
 Wait ~2 minutes for the add-ons to install, then do Phase 3 step 3 (token) if not
 done yet.
 
+Expected on this first run, not failures:
+
+- `openhab.log` errors such as `'publishMQTT' is not a member of ThingActions` or
+  `The name 'Sun_Elevation' cannot be resolved`, and `Item ... is missing` WARNs:
+  the rules loaded before the items and the MQTT binding. Check that later
+  `Rule at system startup` lines have no error after them.
+- A re-run of `actor` does **not** restart `psh-actor`: `install-service.sh` uses
+  `systemctl start`. Check `systemctl show psh-actor -p ActiveEnterTimestamp`.
+
+If `psh-actor` fails with `lgpio.error: 'unexpected error'`, a kernel driver holds
+one of its pins: `pinctrl get 2-3,9-11` shows `a0` instead of `ip`/`op`. Re-run
+`system` (I2C/SPI off), reboot, and check `pinctrl` again.
+
+`pshactor` cannot read the journal (`No journal files were opened`). Read
+`journalctl -u psh-actor` as `openhabian` via `pkam-pi-setup`, or use
+`psh-actor/logs/psh-actor.log`.
+
 ## Phase 5 — Remove the helper, then verify
 
 ```bash
@@ -182,6 +243,19 @@ Then run the normal readiness check (SKILL.md Step 0) and `--verify-only` agains
 - mirror fallbacks used
 - WARNs from Step 0
 - the verify table
+- the power check from Phase 0, again
 - what the user still has to do: Inbox Things, or restoring the JSON database
   from the old Pi (readme → "Recovery after SD card failure" step 2–3), and
-  pointing `pkam-pi` back if this was a test Pi
+  pointing `pkam-pi` back if this was a test Pi; for a replacement, removing the
+  old Pi's GitHub deploy key once it is retired
+
+## After the user adds Things
+
+Run `--verify-only` again; its "Item channels have a Thing" check lists every
+item whose Thing is missing. A device that is not in `ip neigh` on the Pi is most
+likely powered off or off the Wi-Fi, which is why discovery did not find it. The
+Thing UID must equal the one in `orzechowa.items` (for Shelly: the MAC; for
+TP-Link: the last 6 hex digits of the MAC). Discovery also offers Things the repo
+does not use (`astro:sun:local`, `astro:moon:local`, `ntp:ntp:local`, a `km200`
+gateway that needs its `privateKey`); report them as INFO and leave them to the
+user.

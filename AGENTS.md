@@ -38,7 +38,7 @@ The system has three components:
 - **Python 3** — main language for `psh-actor`
 - **paho-mqtt** — MQTT client library
 - **gpiozero** — GPIO abstraction (`LED`, `Button`, `DigitalOutputDevice`)
-- **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.1.4
+- **OpenHAB** — home automation platform (runs on openHABian) in version openHAB 5.2.3
   (known-good; newer versions are allowed but untested, see readme → Known-good versions).
   Required add-ons: astro, km200, mqtt, ntp, http, shelly, tplinksmarthome, jsonpath
   transformation, basic UI — listed in `openhab/services/addons.cfg`
@@ -147,7 +147,7 @@ Topics follow the pattern: `/{ActorName}/{Direction}/{Room}/{Point}`
 | `git log`, `git status`, `git diff` on the Pi | `install-environment.sh`, `install-config.sh`, `install-service.sh` |
 | REST `GET` requests to OpenHAB | REST `POST` / `PUT` / `DELETE` (commands to items, rule changes) |
 | `mosquitto_sub`; `NOTIFY_CURRENT_STATE` to `/Pi1/In/Admin` | Any other `mosquitto_pub` (switches lights, moves blinds, `RESET`) |
-| `pinctrl get` / `raspi-gpio get` | `reboot`, package installs, any change to files on the Pi |
+| `pinctrl get` / `raspi-gpio get`; `vcgencmd get_throttled` (as `openhabian`) | `reboot`, package installs, any change to files on the Pi |
 | `sudo -n /usr/local/sbin/pkam-setup status` (setup only) | Every other `pkam-setup` step (one confirmation of the setup plan per phase) |
 
 > **Restarting `psh-actor` turns OFF every GPIO light** — `Main` calls

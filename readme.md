@@ -2,8 +2,8 @@
 
 ## Known-good versions
 
-This is the last combination confirmed working on the house Pi (recorded 2026-10-20,
-openHAB installed 2026-06-28). The Pi is a 32-bit Raspberry Pi 3 — newer openHAB,
+This is the last combination confirmed working on the house Pi `pkaminski-rpi-1`
+(192.168.1.150), set up with `/pkam-deploy --setup` on 2026-10-25. The Pi is a 32-bit Raspberry Pi 3 — newer openHAB,
 Java or OS releases may drop support for it, so when reinstalling, **start from these
 versions** and upgrade only after checking the openHAB release notes for 32-bit
 (`armhf` / ARMv7) and Java requirements.
@@ -11,14 +11,20 @@ versions** and upgrade only after checking the openHAB release notes for 32-bit
 | Component | Version |
 |-----------|---------|
 | Hardware | Raspberry Pi 3 Model B Rev 1.2, 1 GB RAM |
-| Architecture | `armhf` (32-bit userland), kernel `6.18.34+rpt-rpi-v7` (`armv7l`) |
+| Architecture | `armhf` (32-bit userland), kernel `6.18.50+rpt-rpi-v7` (`armv7l`) |
 | OS image | Raspberry Pi OS reference image 2025-12-04 → Raspbian GNU/Linux 13 (trixie) |
-| openHABian | branch `openHAB`, commit `7abab950` (2026-02-09) |
-| openHAB | `openhab` **5.1.4-1** + `openhab-addons` **5.1.4-1** (Release Build) |
-| Java | OpenJDK **21.0.10** (`openjdk-21-jre-headless 21.0.10+7-1~deb13u1+rpi1`, Client VM) |
+| openHAB | `openhab` **5.2.3-1** + `openhab-addons` **5.2.3-1** (Release Build, as installed by openHABian) |
+| Java | OpenJDK **21.0.12.1** (`openjdk-21-jre-headless 21.0.12.1+1-1~deb13u1+rpi1`, Client VM) |
+| Boot config | I2C and SPI **off** in `/boot/firmware/config.txt` (`config.json` uses BCM 2/3 and 9–11 as GPIO) |
+| apt sources | openHABian defaults (`raspbian.raspberrypi.com` redirector) — kept on purpose |
 | Mosquitto | 2.0.21-1 |
 | Python | 3.13.5 |
 | Python packages | `paho-mqtt` 2.1.0, `gpiozero` 2.0.1 |
+
+The previous house Pi ran openHAB **5.1.4-1** with OpenJDK 21.0.10, kernel
+`6.18.34`, openHABian commit `7abab950` (recorded 2026-10-20). Known issues on
+5.2.3: the `Startup` rule fails once at a cold boot (MQTT not up yet), and HTTPS on
+8443 does not start (`No Server ALPNProcessors!`); see the pkam-deploy skill.
 
 JVM options in `/etc/default/openhab` that work on this 1 GB Pi:
 
@@ -31,11 +37,15 @@ A newer openHAB also works if it supports `armhf` and the installed Java. The
 installed (it never downgrades) and prints a warning. Record the version here once
 it has been confirmed on the house Pi.
 
+Use a proper power supply (official 5.1 V / 2.5 A). With a weak one the kernel logs
+`Undervoltage detected!`, the Pi can reboot on its own, and the SD card is at risk.
+Check with `vcgencmd get_throttled` (as `openhabian`; `0x0` = OK).
+
 **Installing this exact openHAB version** (if it is still in the openHAB apt
 repository) and preventing accidental upgrades:
 
 ```bash
-sudo apt install openhab=5.1.4-1 openhab-addons=5.1.4-1
+sudo apt install openhab=5.2.3-1 openhab-addons=5.2.3-1
 sudo apt-mark hold openhab openhab-addons
 # later, to allow upgrades again:
 sudo apt-mark unhold openhab openhab-addons

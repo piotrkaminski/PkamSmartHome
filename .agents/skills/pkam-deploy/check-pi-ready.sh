@@ -128,6 +128,18 @@ fi
 
 sudo -n true 2>/dev/null && pass "sudo" "passwordless" || warn "sudo" "asks for a password — user runs sudo lines via '! ssh -t pkam-pi ...'"
 [ -r /var/log/openhab/openhab.log ] && pass "openhab.log readable" || warn "openhab.log readable" "'Models loaded' check will be SKIPPED"
+journalctl -u psh-actor -n 1 --no-pager 2>&1 | grep -q "No journal files" \
+    && warn "journal readable" "pshactor not in systemd-journal — 'No crash' uses the actor log and NRestarts" \
+    || pass "journal readable"
+# rpi_volt hwmon: in0_lcrit_alarm is 1 while the supply is below 4.63 V. Readable without vcgencmd.
+volt=$(grep -l rpi_volt /sys/class/hwmon/hwmon*/name 2>/dev/null | head -1)
+if [ -z "$volt" ]; then
+    warn "power" "no rpi_volt sensor — check with vcgencmd get_throttled as openhabian"
+elif [ "$(cat "${volt%/name}/in0_lcrit_alarm" 2>/dev/null)" = 0 ]; then
+    pass "power" "no undervoltage now"
+else
+    warn "power" "UNDERVOLTAGE now — weak power supply, SD card corruption risk"
+fi
 
 tz=$(timedatectl show -p Timezone --value 2>/dev/null)
 [ "$tz" = Europe/Warsaw ] && pass "OS timezone" "$tz" || warn "OS timezone" "$tz, expected Europe/Warsaw"

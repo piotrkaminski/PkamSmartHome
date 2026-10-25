@@ -7,10 +7,10 @@
 # Usage: sudo pkam-setup <step> [arg]
 #   status              read-only: one DONE/TODO line per step
 #   create-user         create pshactor (no password yet), groups, SSH keys
-#   mirror              point apt at RASPBIAN_MIRROR instead of the redirector
+#   mirror              point apt at RASPBIAN_MIRROR instead of the redirector (only on request)
 #   system              timezone, base packages, group memberships, I2C/SPI off (reboot after)
 #   java                OpenJDK 21 (with dead-mirror fallback)
-#   openhab             openHAB (known-good 5.1.4, or a newer one already installed) held, JVM options, service enabled
+#   openhab             openHAB (known-good 5.2.3, or a newer one already installed) held, JVM options, service enabled
 #   mosquitto           Mosquitto broker on localhost:1883, no auth
 #   hostname <name>     set the host name
 #   actor <branch>      clone repo as pshactor, install env, config, service
@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Last version confirmed on the house Pi (readme: Known-good versions). A newer installed
 # version is kept with a WARNING, never downgraded.
-OPENHAB_KNOWN_GOOD=5.1.4-1
+OPENHAB_KNOWN_GOOD=5.2.3-1
 JAVA_PKG=openjdk-21-jre-headless
 TZ_NAME=Europe/Warsaw
 JAVA_OPTS='EXTRA_JAVA_OPTS="-Xms192m -Xmx384m -XX:-TieredCompilation -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError -Dxtext.qn.interning=true -Duser.timezone=Europe/Warsaw"'
@@ -82,11 +82,13 @@ line() { printf '%-5s %-12s %s\n' "$1" "$2" "${3:-}"; }
 
 step_status() {
     bad=$(grep -lE "$UNWANTED_SOURCES" $APT_SOURCES 2>/dev/null | tr '\n' ' ')
-    [ -z "$bad" ] && line DONE mirror "$RASPBIAN_MIRROR" || line TODO mirror "redirector or .ru/.by mirror in: $bad"
+    # The user keeps openHABian's apt sources (2026-10): mirror runs only on request.
+    [ -z "$bad" ] && line DONE mirror "$RASPBIAN_MIRROR" || line INFO mirror "not run (user keeps the default apt sources): $bad"
     id "$ACTOR" >/dev/null 2>&1 && [ -s "$ACTOR_HOME/.ssh/authorized_keys" ] && [ -s "$ACTOR_HOME/.ssh/id_ed25519.pub" ] \
         && line DONE create-user "$(passwd -S "$ACTOR" | awk '{print ($2=="P") ? "password set" : "NO PASSWORD (user must run: sudo passwd pshactor)"}')" \
         || line TODO create-user
-    [ "$(timedatectl show -p Timezone --value)" = "$TZ_NAME" ] && in_group "$ACTOR" openhab && command -v pip3 >/dev/null \
+    [ "$(timedatectl show -p Timezone --value)" = "$TZ_NAME" ] && in_group "$ACTOR" openhab && in_group "$ACTOR" systemd-journal \
+        && command -v pip3 >/dev/null \
         && ! grep -qE "$BUS_ON" "$BOOT_CFG" && line DONE system || line TODO system
     # A pin in an alt mode (a0..a5) is held by a kernel driver; psh-actor needs ip/op.
     pinctrl get 2-3,9-11 2>/dev/null | grep -q ': a[0-5] ' && line WARN gpio "BCM 2/3 or 9-11 held by I2C/SPI — reboot"
@@ -157,6 +159,8 @@ step_system() {
     getent group openhab >/dev/null || groupadd --system openhab
     # pshactor reads openhab.log (deploy check "Models loaded"); openhabian edits /etc/openhab.
     for u in "$ACTOR" openhabian; do usermod -aG openhab "$u"; done
+    # pshactor reads the psh-actor journal (deploy check "No crash").
+    usermod -aG systemd-journal "$ACTOR"
 }
 
 step_java() {

@@ -41,7 +41,7 @@ Step 0 checks all of this read-only.
 |---|-------|--------------|
 | R1 | dev machine | `ssh -o BatchMode=yes pkam-pi true` works: `Host pkam-pi` in `~/.ssh/config` (user `pshactor`), dev public key in the Pi's `~pshactor/.ssh/authorized_keys`, Pi host key already accepted |
 | R2 | dev machine | Repo cloned with push access to `origin`; `psh-actor/.venv` built from `requirements.txt` (for Step 1 tests) |
-| R3 | Pi | Base install done: openHABian, openHAB 5.1.4 or newer (5.1.4 is the known-good version, see readme; add-ons come from `openhab/services/addons.cfg`, see Step 3), Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
+| R3 | Pi | Base install done: openHABian, openHAB 5.2.3 or newer (5.2.3 is the known-good version, see readme; add-ons come from `openhab/services/addons.cfg`, see Step 3), Mosquitto on `localhost:1883` without auth, `mosquitto-clients`, `curl`, `pinctrl` |
 | R4 | Pi | User `pshactor` in groups `sudo` and `gpio` |
 | R5 | Pi | Repo at `/home/pshactor/PkamSmartHome`, `origin` = `git@github.com:piotrkaminski/PkamSmartHome.git`, `pshactor` can fetch without prompts (SSH key on GitHub, `github.com` in `known_hosts`), clean working tree. Any branch is fine if it tracks an `origin` branch and has no commits that are not on origin; a detached HEAD must be a commit that exists on origin |
 | R6 | Pi | `install-environment.sh` run once (`paho-mqtt` + `gpiozero` importable by system `python3`, `psh-actor/logs/` exists) |
@@ -55,6 +55,8 @@ Step 0 checks all of this read-only.
 | O2 | `pshactor` can read `/var/log/openhab/openhab.log` | "Models loaded" check is SKIPPED |
 | O3 | Passwordless `sudo` | User runs each `sudo` line themselves with `! ssh -t pkam-pi ...` (this is the normal case and the safer one) |
 | O4 | OS timezone and the single JVM `-Duser.timezone` are both `Europe/Warsaw` | `T0` and openHAB log timestamps disagree; log windows may be off by an hour |
+| O5 | `pshactor` in group `systemd-journal` (set by `--setup` since 2026-10) | "No crash" reads `psh-actor/logs/psh-actor.log` and `systemctl show -p NRestarts` instead of the journal |
+| O6 | Power supply OK (`rpi_volt` `in0_lcrit_alarm` = 0) | WARN: undervoltage risks SD card corruption. Report it; it does not stop a deploy |
 
 ## Modes
 
@@ -198,7 +200,7 @@ Run every check for each deployed component. A check is PASS, FAIL, or SKIPPED
 | Check | Command | Pass when |
 |-------|---------|-----------|
 | Service active | `systemctl is-active psh-actor` | `active` |
-| No crash | `journalctl -u psh-actor --since "<T0>" --no-pager` | no `Traceback`, `FATAL`, `CRITICAL` |
+| No crash | `journalctl -u psh-actor --since "<T0>" --no-pager`. If it prints `No journal files were opened` (O5 missing), a count of 0 proves nothing: use `systemctl show psh-actor -p NRestarts -p ActiveEnterTimestamp` and the actor log instead | no `Traceback`, `FATAL`, `CRITICAL`; `NRestarts=0` |
 | Started cleanly | `grep -a "" logs/psh-actor.log \| tail -200` | contains `System initialized` after `T0` |
 | MQTT subscribed | same log | `Subscribing to topic /Pi1/In/#` |
 | All points loaded | count `Light point ... initialized` / `Blind point ... initialized` lines vs. points in `config/config.json` | counts equal |
@@ -256,15 +258,27 @@ failure, and never ask the user to paste the token into the chat.
 | Check | Command | Pass when |
 |-------|---------|-----------|
 | Add-ons match | re-run Step 0's script and read its `add-ons` lines | `add-ons installed` PASS. Without a token it only proves the config was applied, so say so in the report; `openhab.log` lines like `Failed installing` are FAIL |
-| Models loaded | `grep -a` without sudo first; if the log is unreadable for `pshactor`, mark SKIPPED (not PASS) — `sudo grep -a "<T0 date>" /var/log/openhab/openhab.log \| grep -E "Loading model\|ERROR\|WARN"` | each changed `orzechowa.*` file logs `Loading model`; no `ERROR` and no new `Configuration model ... has errors` |
+| Models loaded | `grep -a` without sudo first; if the log is unreadable for `pshactor`, mark SKIPPED (not PASS) — `sudo grep -a "<T0 date>" /var/log/openhab/openhab.log \| grep -E "Loading (DSL )?model\|ERROR\|WARN"` (openHAB 5.2 logs `Loading DSL model`) | each changed `orzechowa.*` file logs `Loading DSL model`; no `ERROR` and no new `Configuration model ... has errors`, apart from the known issues below |
 | Things online | `curl -s -H "Authorization: Bearer $(cat ~/.openhab-token)" localhost:8080/rest/things` → parse `UID` + `statusInfo.status` with `python3 -c` | every Thing ONLINE, or same status as the Step 2 baseline. No token → SKIPPED |
 | Items have state | `curl -s localhost:8080/rest/items/<Item>/state` for each item in `orzechowa.items` (works without token) | no item from the changed file missing; MQTT/Shelly/weather items not `NULL`/`UNDEF` |
 | Rules loaded | `.../rest/rules` (needs token) | every `rule "..."` name in `orzechowa.rules` present and not `UNINITIALIZED`. No token → SKIPPED |
+| Item channels have a Thing | `ssh pkam-pi 'python3 -' < .agents/skills/pkam-deploy/check-item-things.py` (needs token) | every line `OK`. `MISSING` = no Thing or channel for that item (FAIL, unless the user says the device is not added yet: then INFO). `NULL` = Thing exists but sent no state yet. `INFO unused Thing` lines are reported, never FAIL |
 | Sitemaps serve | `curl -s -o /dev/null -w "%{http_code}" localhost:8080/rest/sitemaps/orzechowa` and `/watch` | `200` |
 | MQTT ↔ items in sync | for each light point in `config.json` with a channel in `orzechowa.things`, item state equals the 5b reported state | all match |
 
 Points in `config.json` with no channel in `orzechowa.things` (currently the two
 Marysia lights) are reported as **INFO**, not FAIL.
+
+Known issues on openHAB 5.2.3 (armhf), seen on the house Pi since 2026-10-25.
+Report them as INFO, not FAIL, unless they change:
+
+- `Script execution of rule with UID 'orzechowa-1' failed: 'publishMQTT' is not a
+  member of ... ThingActions` right after openHAB starts: the `Startup` rule runs
+  before the MQTT broker Thing is up. Later `Rule at system startup` lines with no
+  error after them mean it recovered.
+- `No Server ALPNProcessors!` / `Config error at <Call name="addConnector">` in
+  `jetty.xml`: HTTPS on 8443 does not work. HTTP on 8080 (REST, BasicUI) is fine.
+- `Can't find the request for ...'s Observer` WARNs while openHAB starts: harmless.
 
 ### 5d. systemd unit (if `linux-service/**` deployed)
 
