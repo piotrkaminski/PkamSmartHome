@@ -137,3 +137,9 @@ dmypy.json
 # PkamSmartHome settings
 openhab/backup/*
 psh-actor/logs/*
+
+# Python virtualenv (tests)
+.venv/
+
+# Claude Code personal settings
+.claude/settings.local.json

@@ -1,7 +1,6 @@
 
 echo "Installing all required Python packages..."
-pip3 install paho-mqtt --break-system-packages
-pip3 install gpiozero --break-system-packages
+pip3 install -r requirements.txt --break-system-packages
 echo "All packages installed"
 
 echo "Create logs folder..."
