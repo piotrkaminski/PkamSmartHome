@@ -8,7 +8,7 @@
 #   status              read-only: one DONE/TODO line per step
 #   create-user         create pshactor (no password yet), groups, SSH keys
 #   mirror              point apt at RASPBIAN_MIRROR instead of the redirector
-#   system              timezone, base packages, group memberships
+#   system              timezone, base packages, group memberships, I2C/SPI off (reboot after)
 #   java                OpenJDK 21 (with dead-mirror fallback)
 #   openhab             openHAB (known-good 5.1.4, or a newer one already installed) held, JVM options, service enabled
 #   mosquitto           Mosquitto broker on localhost:1883, no auth
@@ -40,6 +40,8 @@ RASPBIAN_MIRROR=http://ftp.halifax.rwth-aachen.de/raspbian/raspbian
 FALLBACK_MIRRORS="${PKAM_FALLBACK_MIRRORS:-http://mirror.netcologne.de/raspbian/raspbian http://mirror.init7.net/raspbian/raspbian http://mirrors.ocf.berkeley.edu/raspbian/raspbian}"
 APT_SOURCES="/etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources"
 UNWANTED_SOURCES='raspbian\.raspberrypi\.com|https?://[^/ ]*\.(ru|by)/'
+BOOT_CFG=/boot/firmware/config.txt; [ -f "$BOOT_CFG" ] || BOOT_CFG=/boot/config.txt
+BUS_ON='^([[:space:]]*dtparam=(i2c_arm|i2c1|spi)=on)'
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 log() { echo "== $*"; }
@@ -85,7 +87,8 @@ step_status() {
         && line DONE create-user "$(passwd -S "$ACTOR" | awk '{print ($2=="P") ? "password set" : "NO PASSWORD (user must run: sudo passwd pshactor)"}')" \
         || line TODO create-user
     [ "$(timedatectl show -p Timezone --value)" = "$TZ_NAME" ] && in_group "$ACTOR" openhab && command -v pip3 >/dev/null \
-        && line DONE system || line TODO system
+        && ! grep -qE "$BUS_ON" "$BOOT_CFG" && line DONE system || line TODO system
+    [ -d /sys/class/i2c-adapter/i2c-1 ] || [ -e /dev/spidev0.0 ] && line WARN gpio "I2C or SPI still active — reboot"
     is_installed "$JAVA_PKG" && line DONE java "$(java -version 2>&1 | head -1)" || line TODO java
     v=$(installed_version openhab)
     if [ -n "$v" ] && dpkg --compare-versions "$v" ge "$OPENHAB_KNOWN_GOOD" \
@@ -142,6 +145,13 @@ step_mirror() {
 
 step_system() {
     timedatectl set-timezone "$TZ_NAME"
+    # config.json uses BCM 2/3 (I2C1) and 9-11 (SPI0) as plain GPIO; the kernel drivers
+    # would hold those pins and psh-actor fails with lgpio 'unexpected error'.
+    if grep -qE "$BUS_ON" "$BOOT_CFG"; then
+        cp -a "$BOOT_CFG" "$BOOT_CFG.pkam-setup.bak"
+        sed -i -E "s/$BUS_ON/#\1  # off: psh-actor uses these pins/" "$BOOT_CFG"
+        echo "REBOOT NEEDED: I2C/SPI turned off in $BOOT_CFG (backup: $BOOT_CFG.pkam-setup.bak)"
+    fi
     apt_install git curl python3-pip
     getent group openhab >/dev/null || groupadd --system openhab
     # pshactor reads openhab.log (deploy check "Models loaded"); openhabian edits /etc/openhab.

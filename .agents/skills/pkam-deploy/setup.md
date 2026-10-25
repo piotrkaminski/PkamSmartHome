@@ -99,7 +99,7 @@ Show the plan and get one explicit yes. The plan lists the host name (ask the us
 which one they want; the default is to keep `openhabian`), the openHAB version that
 will be held (known-good `5.1.4-1`, or the newer one already installed: it is
 kept, never downgraded, and the plan says it is untested), `EXTRA_JAVA_OPTS` overwritten with the known-good line,
-timezone `Europe/Warsaw`, apt switched to the fixed Raspbian mirror, and Mosquitto with no authentication on localhost. Then:
+timezone `Europe/Warsaw`, I2C/SPI turned off (needs a reboot), apt switched to the fixed Raspbian mirror, and Mosquitto with no authentication on localhost. Then:
 
 ```bash
 for s in mirror system java openhab mosquitto; do
@@ -115,6 +115,11 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
   mirrors:** never add a `.ru` / `.by` mirror, and never suggest one in a manual fix.
 - `java` / `openhab` / `mosquitto` lines with `got <file> from <mirror>` mean the
   dead-mirror fallback worked. Mention it in the report.
+- `system` turns off I2C and SPI in `/boot/firmware/config.txt`, because
+  `config.json` uses their pins (BCM 2/3 and 9–11) as plain GPIO. When it prints
+  `REBOOT NEEDED`, the Pi must reboot before Phase 4 (put the reboot in the plan;
+  the user runs `ssh -t pkam-pi-setup sudo reboot`). Until then `psh-actor` fails
+  with `lgpio.error: 'unexpected error'`.
 - `openhab` waits up to 10 minutes for REST. A Pi 3 is slow on first start.
 - A `WARNING: openhab <version> is not the known-good ...` line does not stop the
   setup. Carry it into the final report and point to readme → Known-good versions
@@ -126,7 +131,7 @@ ssh pkam-pi-setup 'sudo -n /usr/local/sbin/pkam-setup status'
 ## Phase 3 — Accounts outside the Pi (USER)
 
 1. **GitHub deploy key.** Show the `pshactor` public key from the `create-user`
-   output (or `ssh pkam-pi-setup 'cat /home/pshactor/.ssh/id_ed25519.pub'`). The
+   output (or `ssh pkam-pi 'cat ~/.ssh/id_ed25519.pub'`; `openhabian` cannot read pshactor's home). The
    user adds it under GitHub → repo → Settings → Deploy keys, with write access off.
    Check: `status` line `actor` says "GitHub access OK".
 2. **openHAB admin account.** The user opens `http://<pi-ip>:8080` and creates
